@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
 
 class DataSearch extends SearchDelegate<String> {
+  static const String title = "data_search_home";
   final cities = ["Beirut", "Tripoli", "Tyre", "Sidon", "Byblos", "Jounieh"];
   final recentCities = ["Beirut", "Tripoli"];
+  //var _controller = TextEditingController();
+  //String result  = "";
   @override
 
   //ACTIONS FOR APP BAR
   List<Widget> buildActions(BuildContext context) {
     // TODO: implement buildActions
     return [
-      IconButton(icon: (Icon(Icons.clear)), onPressed: () {})
+      IconButton(icon: (Icon(Icons.clear)), onPressed: () {
+        query = "";
+      })
     ];
   }
 
@@ -28,10 +35,24 @@ class DataSearch extends SearchDelegate<String> {
       );
   }
 
-  //SHOW RESULTS BASED ON USER REQUEST/INPUT
+  /*SHOW RESULTS BASED ON USER REQUEST AFTER FILE/FOLDER IS CLICKED IN SEARCH BAR
+   * WILL NEED TO MAKE THIS REDIRECT/OPEN THE FILE/FOLDER
+   */
   @override
   Widget buildResults(BuildContext context) {
-    // TODO: implement buildResults
+    return Center(
+      child: Container(
+        height: 100.0,
+        width: 100.0,
+        child: Card (
+          color: Colors.orange,
+          //shape: StadiumBorder(),
+          child: Center(
+            child: Text(query),
+          ),
+        ),
+      ),
+    );
 
   }
 
@@ -65,6 +86,9 @@ class DataSearch extends SearchDelegate<String> {
     } else {
         return ListView.builder(itemBuilder: (context, index) =>
             ListTile(
+              onTap: () {
+                showResults(context);
+              },
               leading: Icon(Icons.search),
               title: RichText(
                 text: TextSpan(

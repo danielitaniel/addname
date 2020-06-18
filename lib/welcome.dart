@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:addname/filehome.dart';
+import 'package:addname/registration.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class WelcomePage extends StatefulWidget {
   //LogInPage({Key key, this.title}) : super(key: key);
@@ -20,14 +22,18 @@ class WelcomePage extends StatefulWidget {
 }
 
 class _WelcomePageState extends State<WelcomePage> {
-
+final _auth = FirebaseAuth.instance;
+String email;
+String password;
   //TextStyle style = TextStyle(fontFamily:  'Montserrat', fontSize: 20.0);
 
   @override
   Widget build(BuildContext context) {
 
     final emailField = TextField(
+      textAlign: TextAlign.center,
       obscureText: false,
+      keyboardType: TextInputType.emailAddress,
       //style: style,
       decoration: InputDecoration(
           contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
@@ -35,9 +41,13 @@ class _WelcomePageState extends State<WelcomePage> {
           border:
           OutlineInputBorder(borderRadius: BorderRadius.circular(32.0))
       ),
+      onChanged: (value) {
+        email = value;
+      },
     );
 
     final passwordField = TextField(
+      textAlign: TextAlign.center,
       obscureText: true,
       //style: style,
       decoration: InputDecoration(
@@ -46,6 +56,9 @@ class _WelcomePageState extends State<WelcomePage> {
           border:
           OutlineInputBorder(borderRadius: BorderRadius.circular(32.0))
       ),
+      onChanged: (value) {
+        password = value;
+      },
     );
 
     final loginButton = Material(
@@ -55,8 +68,17 @@ class _WelcomePageState extends State<WelcomePage> {
       child: MaterialButton(
         minWidth: MediaQuery.of(context).size.width,
         padding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-        onPressed: () {
-          Navigator.pushNamed(context, FilePage.title);
+        onPressed: () async {
+          try {
+            final user = await _auth.signInWithEmailAndPassword(
+                email: email, password: password);
+            if (user != null) {
+              Navigator.pushNamed(context, FilePage.title);
+            }
+          } catch (exception) {
+            //TO DO LATER
+            print(exception);
+          }
         },
         child: Text("Login",
           textAlign: TextAlign.center,
@@ -74,7 +96,7 @@ class _WelcomePageState extends State<WelcomePage> {
         minWidth: MediaQuery.of(context).size.width,
         padding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
         onPressed: () {
-//          Navigator.of(context).pushNamed('/filePage');
+          Navigator.pushNamed(context, RegistrationScreen.title);
         },
         child: Text("Register",
           textAlign: TextAlign.center,
@@ -85,37 +107,40 @@ class _WelcomePageState extends State<WelcomePage> {
     );
 
     return Scaffold(
+      //resizeToAvoidBottomInset: false,
       body: Center(
         child: Container(
           color: Colors.white,
           child: Padding(
             padding: const EdgeInsets.all(36.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                SizedBox(
-                  height: 155.0,
-                  child: Image.asset('images/atsignlogo.png',
-                    fit: BoxFit.contain,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  SizedBox(
+                    height: 155.0,
+                    child: Image.asset('images/atsignlogo.png',
+                      fit: BoxFit.contain,
+                    ),
                   ),
-                ),
-                SizedBox(height: 45.0),
-                emailField,
-                SizedBox(height: 25.0),
-                passwordField,
-                SizedBox(
-                  height: 35.0,
-                ),
-                loginButton,
-                SizedBox(
-                  height: 15.0,
-                ),
-                registerButton,
-                SizedBox(
-                  height: 15.0,
-                ),
-              ],
+                  SizedBox(height: 45.0),
+                  emailField,
+                  SizedBox(height: 25.0),
+                  passwordField,
+                  SizedBox(
+                    height: 35.0,
+                  ),
+                  loginButton,
+                  SizedBox(
+                    height: 15.0,
+                  ),
+                  registerButton,
+                  SizedBox(
+                    height: 15.0,
+                  ),
+                ],
+              ),
             ),
           ),
         ),

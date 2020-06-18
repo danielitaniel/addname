@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:addname/main.dart';
 import 'package:addname/datasearch.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 //class MyApp extends StatelessWidget {
 //  // This widget is the root of your application.
@@ -42,20 +43,34 @@ class FilePage extends StatefulWidget {
   // always marked "final".
 
   static String title = "file_home_route";
-
   @override
   _filePage createState() => _filePage();
 }
 
 class _filePage extends State<FilePage> {
   // This widget is the root of your application.
+  final _authentication = FirebaseAuth.instance;
+  void initState() {
+    super.initState();
+    getCurrentUser();
+  }
+  void getCurrentUser() async {
+    try {
+      final user = await _authentication.currentUser();
+      if(user != null) {
+
+      }
+    } catch (exception) {
+      //TO FIX
+      print(exception);
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-
             leading: Icon(
               Icons.list,
             ),
@@ -69,7 +84,9 @@ class _filePage extends State<FilePage> {
 //                );
               },
             ),
-              Icon(null),
+              IconButton(
+                icon: Icon(Icons.exit_to_app, color: Colors.white),
+              ),
             ],
 //            actions: [Stack(
 //              children:[

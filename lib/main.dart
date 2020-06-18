@@ -1,6 +1,8 @@
 import 'package:addname/filehome.dart';
 import 'package:flutter/material.dart';
 import 'package:addname/welcome.dart';
+import 'package:addname/registration.dart';
+import 'package:addname/datasearch.dart';
 import 'package:addname/filehome.dart';
 //import 'file:///Users/danyitani/AndroidStudioProjects/addname/lib/filehome.dart';
 //import 'package:cloud_firestore/cloud_firestore.dart';
@@ -38,6 +40,8 @@ class MyApp extends StatelessWidget {
         routes: {
           WelcomePage.title: (context) => WelcomePage(),
           FilePage.title: (context) => FilePage(),
+          RegistrationScreen.title: (context) => RegistrationScreen(),
+          //DataSearch.title: (context) => DataSearch();
           //DataPage.title: (context) => DataPage(),
 
 
