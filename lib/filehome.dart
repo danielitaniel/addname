@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:addname/main.dart';
+import 'package:addname/welcome.dart';
 import 'package:addname/datasearch.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -86,6 +86,10 @@ class _filePage extends State<FilePage> {
             ),
               IconButton(
                 icon: Icon(Icons.exit_to_app, color: Colors.white),
+                onPressed: () {
+                  _authentication.signOut();
+                  Navigator.pushNamed(context, WelcomePage.title);
+                },
               ),
             ],
 //            actions: [Stack(
