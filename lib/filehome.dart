@@ -202,6 +202,9 @@ class _filePage extends State<FilePage> {
                         barrierDismissible: true,
                         builder: (BuildContext context) {
                           return AlertDialog(
+                            //shape: CircleBorder(
+                              //side: BorderSide(width: 32.0, color: Colors.white),
+                            //),
                             //actionsPadding: EdgeInsets.all(55.0),
                             //buttonPadding: EdgeInsets.fromLTRB(5.0, 0.0, 0.0, 0.0),
                             actions:<Widget>[
@@ -212,7 +215,36 @@ class _filePage extends State<FilePage> {
                                   //),
                                   child: Text(Constants.new_folder),
                                   onPressed: () {
+                                    return showDialog(
+                                      context: context,
+                                      barrierDismissible: true,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: Text("Enter Folder Name"),
+                                          content: TextField(),
+                                          actions:<Widget>[
+                                            Center(
+                                              child: FlatButton(
+                                                child: Text("Cancel"),
+                                                textColor: Colors.orange,
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                              ),
+                                            ),
+                                            Center(
+                                              child: FlatButton(
+                                                child: Text("Create"),
+                                                textColor: Colors.orange,
+                                                onPressed: () {
 
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
                                   },
                                 ),
                               ),
