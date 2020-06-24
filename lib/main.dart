@@ -2,6 +2,7 @@ import 'package:addname/filehome.dart';
 import 'package:flutter/material.dart';
 import 'package:addname/welcome.dart';
 import 'package:addname/registration.dart';
+import 'package:addname/create.dart';
 import 'package:addname/datasearch.dart';
 import 'package:addname/filehome.dart';
 //import 'file:///Users/danyitani/AndroidStudioProjects/addname/lib/filehome.dart';
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget {
           WelcomePage.title: (context) => WelcomePage(),
           FilePage.title: (context) => FilePage(),
           RegistrationScreen.title: (context) => RegistrationScreen(),
+          CreateNew.title: (context) => CreateNew(),
           //DataSearch.title: (context) => DataSearch();
           //DataPage.title: (context) => DataPage(),
 

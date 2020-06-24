@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:addname/filehome.dart';
 import 'package:addname/registration.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 class WelcomePage extends StatefulWidget {
   //LogInPage({Key key, this.title}) : super(key: key);
@@ -23,6 +25,7 @@ class WelcomePage extends StatefulWidget {
 
 class _WelcomePageState extends State<WelcomePage> {
 final _auth = FirebaseAuth.instance;
+bool showSpinner = false;
 String email;
 String password;
   //TextStyle style = TextStyle(fontFamily:  'Montserrat', fontSize: 20.0);
@@ -69,15 +72,21 @@ String password;
         minWidth: MediaQuery.of(context).size.width,
         padding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
         onPressed: () async {
+          setState(() {
+            showSpinner = true;
+          });
           try {
             final user = await _auth.signInWithEmailAndPassword(
                 email: email, password: password);
             if (user != null) {
               Navigator.pushNamed(context, FilePage.title);
             }
+            setState(() {
+              showSpinner = false;
+            });
           } catch (exception) {
             //TO DO LATER
-            print(exception);
+            Navigator.pushNamed(context, WelcomePage.title);
           }
         },
         child: Text("Login",
@@ -96,7 +105,13 @@ String password;
         minWidth: MediaQuery.of(context).size.width,
         padding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
         onPressed: () {
+          setState(() {
+            showSpinner = true;
+          });
           Navigator.pushNamed(context, RegistrationScreen.title);
+          setState(() {
+            showSpinner = false;
+          });
         },
         child: Text("Register",
           textAlign: TextAlign.center,
@@ -108,38 +123,42 @@ String password;
 
     return Scaffold(
       //resizeToAvoidBottomInset: false,
-      body: Center(
-        child: Container(
-          color: Colors.white,
-          child: Padding(
-            padding: const EdgeInsets.all(36.0),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  SizedBox(
-                    height: 155.0,
-                    child: Image.asset('images/atsignlogo.png',
-                      fit: BoxFit.contain,
+      body: ModalProgressHUD(
+        inAsyncCall: showSpinner,
+
+        child: Center(
+          child: Container(
+            color: Colors.white,
+            child: Padding(
+              padding: const EdgeInsets.all(36.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    SizedBox(
+                      height: 155.0,
+                      child: Image.asset('images/atsignlogo.png',
+                        fit: BoxFit.contain,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 45.0),
-                  emailField,
-                  SizedBox(height: 25.0),
-                  passwordField,
-                  SizedBox(
-                    height: 35.0,
-                  ),
-                  loginButton,
-                  SizedBox(
-                    height: 15.0,
-                  ),
-                  registerButton,
-                  SizedBox(
-                    height: 15.0,
-                  ),
-                ],
+                    SizedBox(height: 45.0),
+                    emailField,
+                    SizedBox(height: 25.0),
+                    passwordField,
+                    SizedBox(
+                      height: 35.0,
+                    ),
+                    loginButton,
+                    SizedBox(
+                      height: 15.0,
+                    ),
+                    registerButton,
+                    SizedBox(
+                      height: 15.0,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

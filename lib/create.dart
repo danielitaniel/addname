@@ -1,11 +1,10 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:addname/welcome.dart';
 import 'package:addname/datasearch.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
-import 'package:addname/create.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:addname/filehome.dart';
 
 class Constants {
   static const String new_file = "Upload New File";
@@ -44,7 +43,7 @@ class Constants {
 //  }
 //}
 
-class FilePage extends StatefulWidget {
+class CreateNew extends StatefulWidget {
   //FilePage({Key key, this.title}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
@@ -56,30 +55,19 @@ class FilePage extends StatefulWidget {
   // used by the build method of the State. Fields in a Widget subclass are
   // always marked "final".
 
-  static String title = "file_home_route";
+  static String title = "create_new_route";
   @override
-  _filePage createState() => _filePage();
+  _createNew createState() => _createNew();
 }
 
-class _filePage extends State<FilePage> {
+class _createNew extends State<CreateNew> {
   // This widget is the root of your application.
   final _authentication = FirebaseAuth.instance;
   bool showSpinner = false;
-  //final FocusNode _focusNode = FocusNode();
-
   void initState() {
     super.initState();
     getCurrentUser();
-//    _focusNode.addListener(() {
-//      if (_focusNode.hasFocus) {
-//        this._overlayEntry = this._createOverlayEntry();
-//        Overlay.of(context).insert(this._overlayEntry);
-//      } else {
-//        this._overlayEntry.remove();
-//      }
-//    });
   }
-
   void getCurrentUser() async {
     try {
       final user = await _authentication.currentUser();
@@ -91,45 +79,6 @@ class _filePage extends State<FilePage> {
       print(exception);
     }
   }
-//  @override
-//  void dispose() {
-//    // Clean up the focus node when the Form is disposed.
-//    _focusNode.dispose();
-//
-//    super.dispose();
-//  }
-//
-//
-//  OverlayEntry _overlayEntry;
-//
-//  OverlayEntry _createOverlayEntry() {
-//
-//    RenderBox renderBox = context.findRenderObject();
-//    var size = renderBox.size;
-//    var offset = renderBox.localToGlobal(Offset.zero);
-//
-//    return OverlayEntry(
-//        builder: (context) => Positioned(
-//          left: offset.dx,
-//          top: offset.dy + size.height + 5.0,
-//          width: size.width,
-//          child: Material(
-//            elevation: 4.0,
-//            child: ListView(
-//              padding: EdgeInsets.zero,
-//              shrinkWrap: true,
-//              children: <Widget>[
-//                ListTile(
-//                  title: Text(Constants.new_file),
-//                ),
-//                ListTile(
-//                  title: Text(Constants.new_folder),
-//                ),
-//              ],
-//            ),
-//          ),
-//        )
-//    );
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -197,48 +146,34 @@ class _filePage extends State<FilePage> {
                     size: 40.0,
                   ),
                   onPressed: () {
-                    return showDialog(
-                        context: context,
-                        barrierDismissible: true,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            //actionsPadding: EdgeInsets.all(55.0),
-                            //buttonPadding: EdgeInsets.fromLTRB(5.0, 0.0, 0.0, 0.0),
-                            actions:<Widget>[
-                              Center(
-                                child: FlatButton(
-                                  //padding: EdgeInsets.symmetric(
-                                      //horizontal: 62.0
-                                  //),
-                                  child: Text(Constants.new_folder),
-                                  onPressed: () {
-
-                                  },
-                                ),
-                              ),
-                              Center(
-                                child: FlatButton(
-                                  child: Text(Constants.new_file),
-                                  onPressed: () {
-
-                                  },
-                                  //padding: EdgeInsets.symmetric(
-                                    //horizontal: 72.0
-                                  //),
-                                ),
-                              ),
-                            ],
-                          );
-                        }
-                    );
+                    Navigator.pushNamed(context, FilePage.title);
+                  },
+                ),
+              ),
+              Positioned(
+                bottom: 25,
+                right: 25,
+                child: PopupMenuButton<String>(
+                  onSelected: choiceAction,
+                  itemBuilder: (BuildContext context) {
+                    return Constants.choices.map((String choice) {
+                      return PopupMenuItem<String>(
+                        value: choice,
+                        child: Text(choice),
+                      );
+                    }).toList();
                   },
                 ),
               ),
             ],
           ),
         ),
-    ),
+      ),
     );
+  }
+
+  void choiceAction(String choice) {
+    print('working');
   }
 }
 
@@ -304,10 +239,10 @@ class _searchBar extends State<SearchPage> {
             title: Text("Files")
         ),
         body: SafeArea(
-            child: Container(
-              color: Colors.white,
-              margin: EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
-              child: searchField,
+          child: Container(
+            color: Colors.white,
+            margin: EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
+            child: searchField,
 //              child: Padding(
 //                padding: const EdgeInsets.all(36.0),
 //                child: Column(
@@ -335,6 +270,3 @@ class _searchBar extends State<SearchPage> {
     );
   }
 }
-
-
-
