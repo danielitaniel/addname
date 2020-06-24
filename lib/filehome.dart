@@ -220,8 +220,20 @@ class _filePage extends State<FilePage> {
                                       barrierDismissible: true,
                                       builder: (BuildContext context) {
                                         return AlertDialog(
-                                          title: Text("Enter Folder Name"),
-                                          content: TextField(),
+                                          title: Text("New Folder"),
+                                          titleTextStyle: TextStyle(
+                                            color: Colors.orange,
+                                          ),
+                                          content: TextField(
+                                            cursorColor: Colors.orange,
+                                            decoration: InputDecoration(
+                                              enabledBorder: UnderlineInputBorder(
+                                                borderSide: BorderSide(
+                                                  color: Colors.orange,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
                                           actions:<Widget>[
                                             Center(
                                               child: FlatButton(
