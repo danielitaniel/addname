@@ -17,32 +17,6 @@ class Constants {
   ];
 }
 
-//class MyApp extends StatelessWidget {
-//  // This widget is the root of your application.
-//  @override
-//  Widget build(BuildContext context) {
-//    return MaterialApp(
-//      title: '@AddName File List UI',
-//      theme: ThemeData(
-//        // This is the theme of your application.
-//        //
-//        // Try running your application with "flutter run". You'll see the
-//        // application has an orange toolbar. Then, without quitting the app, try
-//        // changing the primarySwatch below to Colors.green and then invoke
-//        // "hot reload" (press "r" in the console where you ran "flutter run",
-//        // or simply save your changes to "hot reload" in a Flutter IDE).
-//        // Notice that the counter didn't reset back to zero; the application
-//        // is not restarted.
-//        primarySwatch: Colors.orange,
-//        // This makes the visual density adapt to the platform that you run
-//        // the app on. For desktop platforms, the controls will be smaller and
-//        // closer together (more dense) than on mobile platforms.
-//        visualDensity: VisualDensity.adaptivePlatformDensity,
-//      ),
-//      home: MyLogInPage(title: '@AddName Demo Home Page'),
-//    );
-//  }
-//}
 
 class FilePage extends StatefulWidget {
   //FilePage({Key key, this.title}) : super(key: key);
@@ -65,19 +39,10 @@ class _filePage extends State<FilePage> {
   // This widget is the root of your application.
   final _authentication = FirebaseAuth.instance;
   bool showSpinner = false;
-  //final FocusNode _focusNode = FocusNode();
 
   void initState() {
     super.initState();
     getCurrentUser();
-//    _focusNode.addListener(() {
-//      if (_focusNode.hasFocus) {
-//        this._overlayEntry = this._createOverlayEntry();
-//        Overlay.of(context).insert(this._overlayEntry);
-//      } else {
-//        this._overlayEntry.remove();
-//      }
-//    });
   }
 
   void getCurrentUser() async {
@@ -91,45 +56,7 @@ class _filePage extends State<FilePage> {
       print(exception);
     }
   }
-//  @override
-//  void dispose() {
-//    // Clean up the focus node when the Form is disposed.
-//    _focusNode.dispose();
-//
-//    super.dispose();
-//  }
-//
-//
-//  OverlayEntry _overlayEntry;
-//
-//  OverlayEntry _createOverlayEntry() {
-//
-//    RenderBox renderBox = context.findRenderObject();
-//    var size = renderBox.size;
-//    var offset = renderBox.localToGlobal(Offset.zero);
-//
-//    return OverlayEntry(
-//        builder: (context) => Positioned(
-//          left: offset.dx,
-//          top: offset.dy + size.height + 5.0,
-//          width: size.width,
-//          child: Material(
-//            elevation: 4.0,
-//            child: ListView(
-//              padding: EdgeInsets.zero,
-//              shrinkWrap: true,
-//              children: <Widget>[
-//                ListTile(
-//                  title: Text(Constants.new_file),
-//                ),
-//                ListTile(
-//                  title: Text(Constants.new_folder),
-//                ),
-//              ],
-//            ),
-//          ),
-//        )
-//    );
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -151,10 +78,6 @@ class _filePage extends State<FilePage> {
                   setState(() {
                     showSpinner = false;
                   });
-//                Navigator.push(
-//                  context,
-//                  MaterialPageRoute(builder: (context) => SearchPage()),
-//                );
                 },
               ),
                 IconButton(
@@ -171,17 +94,6 @@ class _filePage extends State<FilePage> {
                   },
                 ),
               ],
-//            actions: [Stack(
-//              children:[
-//                Align(
-//                  alignment: Alignment(0.0,0.0),
-//                  child: Icon(
-//                    Icons.search,
-//                  ),
-//                ),
-//                Align()
-//              ]
-//            )],
               backgroundColor: Colors.orange,
               title: Text("Files")
           ),
@@ -202,17 +114,9 @@ class _filePage extends State<FilePage> {
                         barrierDismissible: true,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            //shape: CircleBorder(
-                              //side: BorderSide(width: 32.0, color: Colors.white),
-                            //),
-                            //actionsPadding: EdgeInsets.all(55.0),
-                            //buttonPadding: EdgeInsets.fromLTRB(5.0, 0.0, 0.0, 0.0),
                             actions:<Widget>[
                               Center(
                                 child: FlatButton(
-                                  //padding: EdgeInsets.symmetric(
-                                      //horizontal: 62.0
-                                  //),
                                   child: Text(Constants.new_folder),
                                   onPressed: () {
                                     return showDialog(
@@ -333,17 +237,6 @@ class _searchBar extends State<SearchPage> {
             ),
               Icon(null),
             ],
-            //            actions: [Stack(
-            //              children:[
-            //                Align(
-            //                  alignment: Alignment(0.0,0.0),
-            //                  child: Icon(
-            //                    Icons.search,
-            //                  ),
-            //                ),
-            //                Align()
-            //              ]
-            //            )],
             backgroundColor: Colors.orange,
             title: Text("Files")
         ),
@@ -352,27 +245,6 @@ class _searchBar extends State<SearchPage> {
               color: Colors.white,
               margin: EdgeInsets.symmetric(horizontal: 5.0, vertical: 5.0),
               child: searchField,
-//              child: Padding(
-//                padding: const EdgeInsets.all(36.0),
-//                child: Column(
-//                  crossAxisAlignment: CrossAxisAlignment.center,
-//                  mainAxisAlignment: MainAxisAlignment.center,
-//                  children: <Widget>[
-//                    //trying this out
-//                    SizedBox(height: 45.0),
-//                    searchField,
-//                  //NEW CODE
-////                  Stack(children: [
-////                    Positioned(
-////                      top: 25,
-////                      left: 50,
-////                      child: searchField,
-////                    )
-////                  ]),
-//                  ],
-//                ),
-//              ),
-            //),
           ),
         ),
       ),

@@ -37,20 +37,16 @@ class MyApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
 
       ),
+        //Add routes for simplicity when moving from one page to another page.
         initialRoute: WelcomePage.title,
         routes: {
           WelcomePage.title: (context) => WelcomePage(),
           FilePage.title: (context) => FilePage(),
           RegistrationScreen.title: (context) => RegistrationScreen(),
           CreateNew.title: (context) => CreateNew(),
-          //DataSearch.title: (context) => DataSearch();
-          //DataPage.title: (context) => DataPage(),
 
 
         }
-//       code for route_generator.dart
-//      initialRoute: '/',
-//      onGenerateRoute: RouteGenerator.generateRoute,
     );
   }
 }
