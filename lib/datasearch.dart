@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 
 class DataSearch extends SearchDelegate<String> {
@@ -14,9 +13,12 @@ class DataSearch extends SearchDelegate<String> {
   List<Widget> buildActions(BuildContext context) {
     // TODO: implement buildActions
     return [
-      IconButton(icon: (Icon(Icons.clear)), onPressed: () {
-        query = "";
-      })
+      IconButton(
+          icon: Icon(Icons.clear),
+          onPressed: () {
+            query = "";
+          },
+      ),
     ];
   }
 

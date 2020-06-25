@@ -38,8 +38,11 @@ class FilePage extends StatefulWidget {
 class _filePage extends State<FilePage> {
   // This widget is the root of your application.
   final _authentication = FirebaseAuth.instance;
+  FirebaseUser loggedInUser;
+  final _fireStore = Firestore.instance; 
   bool showSpinner = false;
-
+  var userInputHolder = TextEditingController();
+  String newFolderName;
   void initState() {
     super.initState();
     getCurrentUser();
@@ -49,7 +52,7 @@ class _filePage extends State<FilePage> {
     try {
       final user = await _authentication.currentUser();
       if(user != null) {
-
+        loggedInUser = user;
       }
     } catch (exception) {
       //TO FIX
@@ -129,6 +132,7 @@ class _filePage extends State<FilePage> {
                                             color: Colors.orange,
                                           ),
                                           content: TextField(
+                                            controller: userInputHolder,
                                             cursorColor: Colors.orange,
                                             decoration: InputDecoration(
                                               enabledBorder: UnderlineInputBorder(
@@ -137,6 +141,9 @@ class _filePage extends State<FilePage> {
                                                 ),
                                               ),
                                             ),
+                                            onChanged: (value) {
+                                              newFolderName = value;
+                                            }
                                           ),
                                           actions:<Widget>[
                                             Center(
@@ -153,7 +160,51 @@ class _filePage extends State<FilePage> {
                                                 child: Text("Create"),
                                                 textColor: Colors.orange,
                                                 onPressed: () {
-
+                                                  var owner = loggedInUser.email;
+                                                  DocumentReference folderName = _fireStore.collection('folders').document(owner+newFolderName);
+                                                  if (folderName != null) {
+                                                    setState(() {
+                                                      return showDialog(
+                                                        context: context,
+                                                        barrierDismissible: true,
+                                                        builder: (BuildContext context) {
+                                                          return AlertDialog(
+                                                            title: Text(
+                                                                "Folder Name Already Exists!"
+                                                            ),
+                                                            titleTextStyle: TextStyle(
+                                                              color: Colors.orange,
+                                                              fontSize: 20.0,
+                                                            ),
+                                                            actions: <Widget>[
+                                                            Center(
+                                                                child: FlatButton(
+                                                                  child: Text(
+                                                                      "Ok"
+                                                                  ),
+                                                                  textColor: Colors.orange,
+                                                                  onPressed: () {
+                                                                    userInputHolder.clear();
+                                                                    Navigator.pop(context);
+                                                                  },
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          );
+                                                        },
+                                                      );
+                                                    });
+                                                  } else {
+                                                    //BUILD ENCRYPTION ALGORITHM BEFORE STORING.
+                                                    _fireStore.collection(
+                                                        'folders')
+                                                        .document(owner +
+                                                        newFolderName)
+                                                        .setData({
+                                                      "owner": owner,
+                                                      "folderName": newFolderName,
+                                                    });
+                                                  }
                                                 },
                                               ),
                                             ),
