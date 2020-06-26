@@ -107,9 +107,72 @@ class _filePage extends State<FilePage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                SizedBox(
-                  height: 10.0,
+                StreamBuilder<QuerySnapshot>(
+                  stream: _fireStore.collection('test').snapshots(),
+                  builder: (context, snapshot){
+                    if (snapshot.hasData) {
+                      List<Widget> folderWidgets = [];
+                      folderWidgets.add(
+                        SizedBox(
+                          height: 15.0,
+                        ),
+                      );
+                      final folders = snapshot.data.documents;
+                      for (var folder in folders) {
+                        final folderName = folder.data["folderName"];
+                        final folderWidget = Text(
+                            '$folderName',
+                            style: TextStyle(
+                              fontSize: 15.0,
+                        ),
+                        );
+                        folderWidgets.add(folderWidget);
+                        folderWidgets.add(
+                          SizedBox(
+                            height: 20.0,
+                          ),
+                        );
+                      };
+                      if(folderWidgets.isEmpty) {
+                        return Column(
+                          children: <Widget>[
+                            SizedBox(
+                              height: 15.0,
+                            ),
+                            Text(
+                                "You Have No Files",
+                                style: TextStyle(
+                                  fontSize: 15.0,
+                                ),
+                            ),
+                          ],
+                        );
+                      }
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children:
+                          folderWidgets,
+                      );
+                    } else {
+                      return Column(
+                        children: <Widget>[
+                          SizedBox(
+                            height: 15.0,
+                          ),
+                          Text(
+                              "You Have No Files",
+                              style: TextStyle(
+                                fontSize: 15.0,
+                              ),
+                          ),
+                        ],
+                      );
+                    }
+                  },
                 ),
+//                SizedBox(
+//                  height: 10.0,
+//                ),
                 Container(
                   child: Align(
                     heightFactor: 1.5,
@@ -215,7 +278,6 @@ class _filePage extends State<FilePage> {
                                                       var folderNames = await _fireStore.collection('test').getDocuments();
                                                       for(var folderName in folderNames.documents) {
                                                         if(folderName.documentID == (owner + newFolderName)) {
-                                                          print("CHANGED");
                                                           folderNameExists = !folderNameExists;
                                                         }
                                                       }
@@ -254,17 +316,19 @@ class _filePage extends State<FilePage> {
                                                         });
                                                       } else {
                                                         //BUILD ENCRYPTION ALGORITHM BEFORE STORING.
-                                                        _fireStore.collection(
-                                                            'test')
-                                                            .document(owner +
-                                                            newFolderName)
-                                                            .setData({
-                                                          "owner": owner,
-                                                          "folderName": newFolderName,
-                                                        });
-                                                        print("DOCUMENT CREATED");
-                                                        userInputHolder.clear();
-                                                        newFolderName = null;
+                                                          _fireStore.collection(
+                                                              'test')
+                                                              .document(owner +
+                                                              newFolderName)
+                                                              .setData({
+                                                            "owner": owner,
+                                                            "folderName": newFolderName,
+                                                          });
+                                                          userInputHolder.clear();
+                                                          newFolderName = null;
+                                                          Navigator.pop(context);
+                                                          //NEED THIS SECOND CALL. DON'T REMOVE
+                                                          Navigator.pop(context);
                                                       }
                                                     },
                                                   ),
