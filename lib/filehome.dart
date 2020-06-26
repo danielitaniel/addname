@@ -120,11 +120,68 @@ class _filePage extends State<FilePage> {
                       final folders = snapshot.data.documents;
                       for (var folder in folders) {
                         final folderName = folder.data["folderName"];
-                        final folderWidget = Text(
-                            '$folderName',
-                            style: TextStyle(
-                              fontSize: 15.0,
-                        ),
+                        final folderWidget = Stack(
+                            children: <Widget> [
+                              Row(
+                                //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: <Widget> [
+                                  SizedBox(
+                                    width: 30.0,
+                                  ),
+                                  Flexible(
+                                    fit: FlexFit.tight,
+                                    flex: 1,
+                                    child: Container(
+                                      child: Icon(
+                                        Icons.folder
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 50.0,
+                                  ),
+                                  Flexible(
+                                    fit: FlexFit.tight,
+                                    flex: 5,
+                                    child: Container(
+                                      child: Text(
+                                        '$folderName',
+                                        style: TextStyle(
+                                          fontSize: 15.0,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 20.0,
+                                  ),
+                                  Flexible(
+                                    fit: FlexFit.tight,
+                                    flex: 1,
+                                    child: Container(
+                                      child: Icon(
+                                        Icons.send,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 5.0,
+                                  ),
+                                  Flexible(
+                                    fit: FlexFit.tight,
+                                    flex: 1,
+                                    child: Container(
+                                      child: Icon(
+                                        Icons.delete,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 15.0,
+                                  ),
+                                ],
+                              ),
+                            ],
                         );
                         folderWidgets.add(folderWidget);
                         folderWidgets.add(
