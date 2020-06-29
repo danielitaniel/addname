@@ -115,9 +115,8 @@ class _filePage extends State<FilePage> {
                     stream: _fireStore.collection('test').snapshots(),
                     builder: (context, snapshot){
                       //add loading screen here
-                      bool hasData = false;
+                      List<Widget> homeScreenWidgets = [];
                       if (snapshot.hasData) {
-                        List<Widget> homeScreenWidgets = [];
                         homeScreenWidgets.add(
                           SizedBox(
                             height: 15.0,
@@ -125,7 +124,6 @@ class _filePage extends State<FilePage> {
                         );
                         final files = snapshot.data.documents;
                         for (var file in files) {
-                          hasData = !hasData;
                           final dataName = file.data["name"];
                           final isFolder = file.data["isFolder"];
                           if (isFolder) {
@@ -142,12 +140,13 @@ class _filePage extends State<FilePage> {
                                       flex: 1,
                                       child: Container(
                                         child: Icon(
-                                            Icons.folder
+                                          Icons.folder,
+                                          color: Colors.orange,
                                         ),
                                       ),
                                     ),
                                     SizedBox(
-                                      width: 50.0,
+                                      width: 20.0,
                                     ),
                                     Flexible(
                                       fit: FlexFit.tight,
@@ -179,6 +178,7 @@ class _filePage extends State<FilePage> {
                                         child: IconButton(
                                           icon: Icon(
                                             Icons.send,
+                                            color: Colors.orange,
                                           ),
                                           onPressed: () {
 
@@ -196,6 +196,7 @@ class _filePage extends State<FilePage> {
                                         child: IconButton(
                                           icon: Icon(
                                             Icons.delete,
+                                            color: Colors.orange,
                                           ),
                                           onPressed: () {
                                               return showDialog(
@@ -282,12 +283,13 @@ class _filePage extends State<FilePage> {
                                       flex: 1,
                                       child: Container(
                                         child: Icon(
-                                            Icons.chrome_reader_mode,
+                                          Icons.chrome_reader_mode,
+                                          color: Colors.orange,
                                         ),
                                       ),
                                     ),
                                     SizedBox(
-                                      width: 50.0,
+                                      width: 20.0,
                                     ),
                                     Flexible(
                                       fit: FlexFit.tight,
@@ -319,6 +321,7 @@ class _filePage extends State<FilePage> {
                                         child: IconButton(
                                           icon: Icon(
                                             Icons.send,
+                                            color: Colors.orange,
                                           ),
                                           onPressed: () {
 
@@ -336,6 +339,7 @@ class _filePage extends State<FilePage> {
                                         child: IconButton(
                                           icon: Icon(
                                             Icons.delete,
+                                            color: Colors.orange,
                                           ),
                                           onPressed: () {
                                             return showDialog(
@@ -415,41 +419,27 @@ class _filePage extends State<FilePage> {
                             ),
                           );
                         }
-                        if(!hasData){
-                          return Column(
-                            children: <Widget>[
-                              SizedBox(
-                                height: 15.0,
+                      }
+                      if(!snapshot.hasData || snapshot.data.documents.isEmpty){
+                        return Column(
+                          children: <Widget>[
+                            SizedBox(
+                              height: 15.0,
+                            ),
+                            Text(
+                              "You Have No Files",
+                              style: TextStyle(
+                                fontSize: 15.0,
                               ),
-                              Text(
-                                "You Have No Files",
-                                style: TextStyle(
-                                  fontSize: 15.0,
-                                ),
-                              ),
-                            ],
-                          );
-                        } else {
-                            return Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children:
-                              homeScreenWidgets,
-                            );
-                        }
+                            ),
+                          ],
+                        );
                       } else {
-                          return Column(
-                            children: <Widget>[
-                              SizedBox(
-                                height: 15.0,
-                              ),
-                              Text(
-                                  "You Have No Files",
-                                  style: TextStyle(
-                                    fontSize: 15.0,
-                                  ),
-                              ),
-                            ],
-                          );
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children:
+                          homeScreenWidgets,
+                        );
                       }
                     },
                   ),
