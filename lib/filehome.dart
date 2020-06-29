@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:addname/welcome.dart';
@@ -196,7 +198,64 @@ class _filePage extends State<FilePage> {
                                             Icons.delete,
                                           ),
                                           onPressed: () {
-                                            deleteFolder(loggedInUser.email, '$dataName');
+                                              return showDialog(
+                                                  context: context,
+                                                  barrierDismissible: true,
+                                                  builder: (
+                                                      BuildContext context) {
+                                                      return AlertDialog(
+                                                        title: RichText(
+                                                          text: TextSpan(
+                                                            children: [
+                                                              TextSpan(
+                                                                text: "Are you sure you want to delete the folder ",
+                                                                style: TextStyle(
+                                                                  fontSize: 20.0,
+                                                                  color: Colors.black,
+                                                                ),
+                                                              ),
+                                                              TextSpan(
+                                                                  text: dataName,
+                                                                  style: TextStyle(
+                                                                    fontSize: 20.0,
+                                                                    color: Colors.black,
+                                                                    fontStyle: FontStyle.italic,
+                                                                    fontWeight: FontWeight.bold,
+                                                                  ),
+                                                              ),
+                                                              TextSpan(
+                                                                text: "?",
+                                                                style: TextStyle(
+                                                                  fontSize: 20.0,
+                                                                  color: Colors.black,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        actions: <Widget>[
+                                                          FlatButton(
+                                                            child: Text("Yes"),
+                                                            onPressed: () {
+                                                              deleteFolder(
+                                                                  loggedInUser
+                                                                      .email,
+                                                                  '$dataName');
+                                                              Navigator.pop(
+                                                                  context);
+                                                            },
+                                                          ),
+                                                          FlatButton(
+                                                            child: Text("No"),
+                                                            onPressed: () {
+                                                              Navigator.pop(
+                                                                  context);
+                                                            },
+                                                          ),
+                                                        ],
+                                                      );
+                                                  }
+                                              );
                                           },
                                         ),
                                       ),
@@ -279,7 +338,64 @@ class _filePage extends State<FilePage> {
                                             Icons.delete,
                                           ),
                                           onPressed: () {
-                                            deleteFolder(loggedInUser.email, '$dataName');
+                                            return showDialog(
+                                                context: context,
+                                                barrierDismissible: true,
+                                                builder: (
+                                                    BuildContext context) {
+                                                  return AlertDialog(
+                                                    title: RichText(
+                                                      text: TextSpan(
+                                                        children: [
+                                                          TextSpan(
+                                                            text: "Are you sure you want to delete the file ",
+                                                            style: TextStyle(
+                                                              fontSize: 20.0,
+                                                              color: Colors.black,
+                                                            ),
+                                                          ),
+                                                          TextSpan(
+                                                            text: dataName,
+                                                            style: TextStyle(
+                                                              fontSize: 20.0,
+                                                              color: Colors.black,
+                                                              fontStyle: FontStyle.italic,
+                                                              fontWeight: FontWeight.bold,
+                                                            ),
+                                                          ),
+                                                          TextSpan(
+                                                            text: "?",
+                                                            style: TextStyle(
+                                                              fontSize: 20.0,
+                                                              color: Colors.black,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    actions: <Widget>[
+                                                      FlatButton(
+                                                        child: Text("Yes"),
+                                                        onPressed: () {
+                                                          deleteFolder(
+                                                              loggedInUser
+                                                                  .email,
+                                                              '$dataName');
+                                                          Navigator.pop(
+                                                              context);
+                                                        },
+                                                      ),
+                                                      FlatButton(
+                                                        child: Text("No"),
+                                                        onPressed: () {
+                                                          Navigator.pop(
+                                                              context);
+                                                        },
+                                                      ),
+                                                    ],
+                                                  );
+                                                }
+                                            );
                                           },
                                         ),
                                       ),
