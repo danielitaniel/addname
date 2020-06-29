@@ -104,166 +104,223 @@ class _filePage extends State<FilePage> {
               title: Text("Files")
           ),
           body: SafeArea(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                StreamBuilder<QuerySnapshot>(
-                  stream: _fireStore.collection('test').snapshots(),
-                  builder: (context, snapshot){
-                    //add loading screen here
-                    if (snapshot.hasData) {
-                      List<Widget> homeScreenWidgets = [];
-                      homeScreenWidgets.add(
-                        SizedBox(
-                          height: 15.0,
-                        ),
-                      );
-                      final files = snapshot.data.documents;
-                      for (var file in files) {
-                        final dataName = file.data["name"];
-                        final isFolder = file.data["isFolder"];
-                        if (isFolder) {
-                          print("there is at least one data item");
-                          final folderWidget = Stack(
-                            children: <Widget>[
-                              Row(
-                                //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: <Widget>[
-                                  SizedBox(
-                                    width: 30.0,
-                                  ),
-                                  Flexible(
-                                    fit: FlexFit.tight,
-                                    flex: 1,
-                                    child: Container(
-                                      child: Icon(
-                                          Icons.folder
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 50.0,
-                                  ),
-                                  Flexible(
-                                    fit: FlexFit.tight,
-                                    flex: 5,
-                                    child: Container(
-                                      child: Text(
-                                        '$dataName',
-                                        style: TextStyle(
-                                          fontSize: 15.0,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 20.0,
-                                  ),
-                                  Flexible(
-                                    fit: FlexFit.tight,
-                                    flex: 1,
-                                    child: Container(
-                                      child: Icon(
-                                        Icons.send,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 5.0,
-                                  ),
-                                  Flexible(
-                                    fit: FlexFit.tight,
-                                    flex: 1,
-                                    child: Container(
-                                      child: Icon(
-                                        Icons.delete,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 15.0,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          );
-                          homeScreenWidgets.add(folderWidget);
-                        } else {
-                          print("there is no data items here");
-                          final fileWidget = Stack(
-                            children: <Widget>[
-                              Row(
-                                //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: <Widget>[
-                                  SizedBox(
-                                    width: 30.0,
-                                  ),
-                                  Flexible(
-                                    fit: FlexFit.tight,
-                                    flex: 1,
-                                    child: Container(
-                                      child: Icon(
-                                          Icons.chrome_reader_mode,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 50.0,
-                                  ),
-                                  Flexible(
-                                    fit: FlexFit.tight,
-                                    flex: 5,
-                                    child: Container(
-                                      child: Text(
-                                        '$dataName',
-                                        style: TextStyle(
-                                          fontSize: 15.0,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 20.0,
-                                  ),
-                                  Flexible(
-                                    fit: FlexFit.tight,
-                                    flex: 1,
-                                    child: Container(
-                                      child: Icon(
-                                        Icons.send,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 5.0,
-                                  ),
-                                  Flexible(
-                                    fit: FlexFit.tight,
-                                    flex: 1,
-                                    child: Container(
-                                      child: Icon(
-                                        Icons.delete,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 15.0,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          );
-                          homeScreenWidgets.add(fileWidget);
-                        }
+            child: SingleChildScrollView (
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  StreamBuilder<QuerySnapshot>(
+                    stream: _fireStore.collection('test').snapshots(),
+                    builder: (context, snapshot){
+                      //add loading screen here
+                      if (snapshot.hasData) {
+                        List<Widget> homeScreenWidgets = [];
                         homeScreenWidgets.add(
                           SizedBox(
-                            height: 20.0,
+                            height: 15.0,
                           ),
                         );
-                      };
-                      if(homeScreenWidgets.isEmpty) {
-                        //add loading screen before showing this!
+                        final files = snapshot.data.documents;
+                        for (var file in files) {
+                          final dataName = file.data["name"];
+                          final isFolder = file.data["isFolder"];
+                          if (isFolder) {
+                            final folderWidget = Stack(
+                              children: <Widget>[
+                                Row(
+                                  //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: <Widget>[
+                                    SizedBox(
+                                      width: 30.0,
+                                    ),
+                                    Flexible(
+                                      fit: FlexFit.tight,
+                                      flex: 1,
+                                      child: Container(
+                                        child: Icon(
+                                            Icons.folder
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 50.0,
+                                    ),
+                                    Flexible(
+                                      fit: FlexFit.tight,
+                                      flex: 5,
+                                      child: Container(
+                                        child: FlatButton(
+                                          child: Text(
+                                            '$dataName',
+                                            style: TextStyle(
+                                              fontSize: 15.0,
+                                            ),
+                                            textAlign: TextAlign.justify,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          onPressed: () {
+
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 20.0,
+                                    ),
+                                    Flexible(
+                                      fit: FlexFit.tight,
+                                      flex: 1,
+                                      child: Container(
+                                        child: IconButton(
+                                          icon: Icon(
+                                            Icons.send,
+                                          ),
+                                          onPressed: () {
+
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 5.0,
+                                    ),
+                                    Flexible(
+                                      fit: FlexFit.tight,
+                                      flex: 1,
+                                      child: Container(
+                                        child: IconButton(
+                                          icon: Icon(
+                                            Icons.delete,
+                                          ),
+                                          onPressed: () {
+                                            print('here');
+                                            deleteFolder(loggedInUser.email, '$dataName');
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 15.0,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            );
+                            homeScreenWidgets.add(folderWidget);
+                          } else {
+                            final fileWidget = Stack(
+                              children: <Widget>[
+                                Row(
+                                  //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: <Widget>[
+                                    SizedBox(
+                                      width: 30.0,
+                                    ),
+                                    Flexible(
+                                      fit: FlexFit.tight,
+                                      flex: 1,
+                                      child: Container(
+                                        child: Icon(
+                                            Icons.chrome_reader_mode,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 50.0,
+                                    ),
+                                    Flexible(
+                                      fit: FlexFit.tight,
+                                      flex: 5,
+                                      child: Container(
+                                        child: FlatButton(
+                                          child: Text(
+                                            '$dataName',
+                                            style: TextStyle(
+                                              fontSize: 15.0,
+                                            ),
+                                            textAlign: TextAlign.justify,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          onPressed: () {
+
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 20.0,
+                                    ),
+                                    Flexible(
+                                      fit: FlexFit.tight,
+                                      flex: 1,
+                                      child: Container(
+                                        child: IconButton(
+                                          icon: Icon(
+                                            Icons.send,
+                                          ),
+                                          onPressed: () {
+
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 5.0,
+                                    ),
+                                    Flexible(
+                                      fit: FlexFit.tight,
+                                      flex: 1,
+                                      child: Container(
+                                        child: IconButton(
+                                          icon: Icon(
+                                            Icons.delete,
+                                          ),
+                                          onPressed: () {
+                                            print('here');
+                                            deleteFolder(loggedInUser.email, '$dataName');
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 15.0,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            );
+                            homeScreenWidgets.add(fileWidget);
+                          }
+                          homeScreenWidgets.add(
+                            SizedBox(
+                              height: 20.0,
+                            ),
+                          );
+                        };
+                        if(homeScreenWidgets.isEmpty) {
+                          //add loading screen before showing this!
+                          return Column(
+                            children: <Widget>[
+                              SizedBox(
+                                height: 15.0,
+                              ),
+                              Text(
+                                  "You Have No Files",
+                                  style: TextStyle(
+                                    fontSize: 15.0,
+                                  ),
+                              ),
+                            ],
+                          );
+                        }
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children:
+                            homeScreenWidgets,
+                        );
+                      } else {
                         return Column(
                           children: <Widget>[
                             SizedBox(
@@ -278,369 +335,351 @@ class _filePage extends State<FilePage> {
                           ],
                         );
                       }
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children:
-                          homeScreenWidgets,
-                      );
-                    } else {
-                      return Column(
-                        children: <Widget>[
-                          SizedBox(
-                            height: 15.0,
-                          ),
-                          Text(
-                              "You Have No Files",
-                              style: TextStyle(
-                                fontSize: 15.0,
-                              ),
-                          ),
-                        ],
-                      );
-                    }
-                  },
-                ),
+                    },
+                  ),
 //                SizedBox(
 //                  height: 10.0,
 //                ),
-                Container(
-                  child: Align(
-                    heightFactor: 1.5,
-                    alignment: Alignment(0.85, -0.85),
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.add_circle,
-                        color: Colors.orange,
-                        size: 40.0,
-                      ),
-                      onPressed: () {
-                        return showDialog(
-                            context: context,
-                            barrierDismissible: true,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                actions:<Widget>[
-                                  Center(
-                                    child: FlatButton(
-                                      child: Text(Constants.new_folder),
-                                      onPressed: () {
-                                        return showDialog(
-                                          context: context,
-                                          barrierDismissible: true,
-                                          builder: (BuildContext context) {
-                                            return AlertDialog(
-                                              title: Text("New Folder"),
-                                              titleTextStyle: TextStyle(
+                  ],
+                ),
+            ),
+          ),
+          floatingActionButton: Container(
+            height: 45.0,
+            width: 45.0,
+            child: FittedBox(
+              child: FloatingActionButton(
+                backgroundColor: Colors.orange,
+                child: Icon(
+                    Icons.add,
+                    size: 35.0,
+                ),
+//            child: Icon(
+//              Icons.add_circle,
+//              //color: Colors.orange,
+//              size: 40.0,
+//            ),
+                onPressed: () {
+                  return showDialog(
+                    context: context,
+                    barrierDismissible: true,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        actions:<Widget>[
+                          Center(
+                            child: FlatButton(
+                              child: Text(Constants.new_folder),
+                              onPressed: () {
+                                return showDialog(
+                                  context: context,
+                                  barrierDismissible: true,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text("New Folder"),
+                                      titleTextStyle: TextStyle(
+                                        color: Colors.orange,
+                                      ),
+                                      content: TextField(
+                                          controller: userInputHolder,
+                                          cursorColor: Colors.orange,
+                                          decoration: InputDecoration(
+                                            enabledBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
                                                 color: Colors.orange,
                                               ),
-                                              content: TextField(
-                                                controller: userInputHolder,
-                                                cursorColor: Colors.orange,
-                                                decoration: InputDecoration(
-                                                  enabledBorder: UnderlineInputBorder(
-                                                    borderSide: BorderSide(
-                                                      color: Colors.orange,
-                                                    ),
-                                                  ),
-                                                ),
-                                                onChanged: (value) {
-                                                  newFolderName = value;
+                                            ),
+                                          ),
+                                          onChanged: (value) {
+                                            newFolderName = value;
+                                          }
+                                      ),
+                                      actions:<Widget>[
+                                        Center(
+                                          child: FlatButton(
+                                            child: Text("Cancel"),
+                                            textColor: Colors.orange,
+                                            onPressed: () {
+                                              userInputHolder.clear();
+                                              newFolderName = null;
+                                              Navigator.pop(context);
+                                            },
+                                          ),
+                                        ),
+                                        Center(
+                                          child: FlatButton(
+                                            child: Text("Create"),
+                                            textColor: Colors.orange,
+                                            onPressed: () async {
+                                              //User must create folder name
+                                              if((newFolderName == null) || (newFolderName == "")) {
+                                                setState(() {
+                                                  return showDialog(
+                                                    context: context,
+                                                    barrierDismissible: true,
+                                                    builder: (BuildContext context) {
+                                                      return AlertDialog(
+                                                        title: Text(
+                                                            "Folder name required"
+                                                        ),
+                                                        titleTextStyle: TextStyle(
+                                                          color: Colors.orange,
+                                                          fontSize: 20.0,
+                                                        ),
+                                                        actions: <Widget>[
+                                                          Center(
+                                                            child: FlatButton(
+                                                              child: Text(
+                                                                  "Ok"
+                                                              ),
+                                                              textColor: Colors.orange,
+                                                              onPressed: () {
+                                                                userInputHolder.clear();
+                                                                newFolderName = null;
+                                                                Navigator.pop(context);
+                                                              },
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      );
+                                                    },
+                                                  );
+                                                });
+                                              };
+                                              var owner = loggedInUser.email;
+                                              //DocumentReference folderName = _fireStore.collection('folders').document(owner+newFolderName);
+                                              //print(folderName.path);
+                                              var folderNameExists = false;
+                                              var dataStorage = await _fireStore.collection('test').getDocuments();
+                                              for(var folderName in dataStorage.documents) {
+                                                if(folderName.documentID == (owner + newFolderName)) {
+                                                  folderNameExists = !folderNameExists;
                                                 }
-                                              ),
-                                              actions:<Widget>[
-                                                Center(
-                                                  child: FlatButton(
-                                                    child: Text("Cancel"),
-                                                    textColor: Colors.orange,
-                                                    onPressed: () {
-                                                      userInputHolder.clear();
-                                                      newFolderName = null;
-                                                      Navigator.pop(context);
+                                              }
+                                              if (folderNameExists) {
+                                                setState(() {
+                                                  return showDialog(
+                                                    context: context,
+                                                    barrierDismissible: true,
+                                                    builder: (BuildContext context) {
+                                                      return AlertDialog(
+                                                        title: Text(
+                                                            "Folder Name Already Exists"
+                                                        ),
+                                                        titleTextStyle: TextStyle(
+                                                          color: Colors.orange,
+                                                          fontSize: 20.0,
+                                                        ),
+                                                        actions: <Widget>[
+                                                          Center(
+                                                            child: FlatButton(
+                                                              child: Text(
+                                                                  "Ok"
+                                                              ),
+                                                              textColor: Colors.orange,
+                                                              onPressed: () {
+                                                                userInputHolder.clear();
+                                                                newFolderName = null;
+                                                                Navigator.pop(context);
+                                                              },
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      );
                                                     },
-                                                  ),
-                                                ),
-                                                Center(
-                                                  child: FlatButton(
-                                                    child: Text("Create"),
-                                                    textColor: Colors.orange,
-                                                    onPressed: () async {
-                                                      //User must create folder name
-                                                      if((newFolderName == null) || (newFolderName == "")) {
-                                                        setState(() {
-                                                          return showDialog(
-                                                            context: context,
-                                                            barrierDismissible: true,
-                                                            builder: (BuildContext context) {
-                                                              return AlertDialog(
-                                                                title: Text(
-                                                                    "Folder name required"
-                                                                ),
-                                                                titleTextStyle: TextStyle(
-                                                                  color: Colors.orange,
-                                                                  fontSize: 20.0,
-                                                                ),
-                                                                actions: <Widget>[
-                                                                  Center(
-                                                                    child: FlatButton(
-                                                                      child: Text(
-                                                                          "Ok"
-                                                                      ),
-                                                                      textColor: Colors.orange,
-                                                                      onPressed: () {
-                                                                        userInputHolder.clear();
-                                                                        newFolderName = null;
-                                                                        Navigator.pop(context);
-                                                                      },
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              );
-                                                            },
-                                                          );
-                                                        });
-                                                      };
-                                                      var owner = loggedInUser.email;
-                                                      //DocumentReference folderName = _fireStore.collection('folders').document(owner+newFolderName);
-                                                      //print(folderName.path);
-                                                      var folderNameExists = false;
-                                                      var dataStorage = await _fireStore.collection('test').getDocuments();
-                                                      for(var folderName in dataStorage.documents) {
-                                                        if(folderName.documentID == (owner + newFolderName)) {
-                                                          folderNameExists = !folderNameExists;
-                                                        }
-                                                      }
-                                                      if (folderNameExists) {
-                                                        setState(() {
-                                                          return showDialog(
-                                                            context: context,
-                                                            barrierDismissible: true,
-                                                            builder: (BuildContext context) {
-                                                              return AlertDialog(
-                                                                title: Text(
-                                                                    "Folder Name Already Exists"
-                                                                ),
-                                                                titleTextStyle: TextStyle(
-                                                                  color: Colors.orange,
-                                                                  fontSize: 20.0,
-                                                                ),
-                                                                actions: <Widget>[
-                                                                Center(
-                                                                    child: FlatButton(
-                                                                      child: Text(
-                                                                          "Ok"
-                                                                      ),
-                                                                      textColor: Colors.orange,
-                                                                      onPressed: () {
-                                                                        userInputHolder.clear();
-                                                                        newFolderName = null;
-                                                                        Navigator.pop(context);
-                                                                      },
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              );
-                                                            },
-                                                          );
-                                                        });
-                                                      } else {
-                                                        //BUILD ENCRYPTION ALGORITHM BEFORE STORING.
-                                                          _fireStore.collection(
-                                                              'test')
-                                                              .document(owner +
-                                                              newFolderName)
-                                                              .setData({
-                                                            "owner": owner,
-                                                            "name": newFolderName,
-                                                            "isFolder": true,
-                                                          });
-                                                          userInputHolder.clear();
-                                                          newFolderName = null;
-                                                          Navigator.pop(context);
-                                                          //NEED THIS SECOND CALL. DON'T REMOVE
-                                                          Navigator.pop(context);
-                                                      }
-                                                    },
-                                                  ),
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                  Center(
-                                    child: FlatButton(
-                                      child: Text(Constants.new_file),
-                                      onPressed: () {
-                                        return showDialog(
-                                          context: context,
-                                          barrierDismissible: true,
-                                          builder: (BuildContext context) {
-                                            return AlertDialog(
-                                              title: Text("New File"),
-                                              titleTextStyle: TextStyle(
+                                                  );
+                                                });
+                                              } else {
+                                                //BUILD ENCRYPTION ALGORITHM BEFORE STORING.
+                                                _fireStore.collection(
+                                                    'test')
+                                                    .document(owner +
+                                                    newFolderName)
+                                                    .setData({
+                                                  "owner": owner,
+                                                  "name": newFolderName,
+                                                  "isFolder": true,
+                                                });
+                                                userInputHolder.clear();
+                                                newFolderName = null;
+                                                Navigator.pop(context);
+                                                //NEED THIS SECOND CALL. DON'T REMOVE
+                                                Navigator.pop(context);
+                                              }
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                          Center(
+                            child: FlatButton(
+                              child: Text(Constants.new_file),
+                              onPressed: () {
+                                return showDialog(
+                                  context: context,
+                                  barrierDismissible: true,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      title: Text("New File"),
+                                      titleTextStyle: TextStyle(
+                                        color: Colors.orange,
+                                      ),
+                                      content: TextField(
+                                          controller: userInputHolder,
+                                          cursorColor: Colors.orange,
+                                          decoration: InputDecoration(
+                                            enabledBorder: UnderlineInputBorder(
+                                              borderSide: BorderSide(
                                                 color: Colors.orange,
                                               ),
-                                              content: TextField(
-                                                  controller: userInputHolder,
-                                                  cursorColor: Colors.orange,
-                                                  decoration: InputDecoration(
-                                                    enabledBorder: UnderlineInputBorder(
-                                                      borderSide: BorderSide(
-                                                        color: Colors.orange,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  onChanged: (value) {
-                                                    newFileName = value;
-                                                  }
-                                              ),
-                                              actions:<Widget>[
-                                                Center(
-                                                  child: FlatButton(
-                                                    child: Text("Cancel"),
-                                                    textColor: Colors.orange,
-                                                    onPressed: () {
-                                                      userInputHolder.clear();
-                                                      newFileName = null;
-                                                      Navigator.pop(context);
+                                            ),
+                                          ),
+                                          onChanged: (value) {
+                                            newFileName = value;
+                                          }
+                                      ),
+                                      actions:<Widget>[
+                                        Center(
+                                          child: FlatButton(
+                                            child: Text("Cancel"),
+                                            textColor: Colors.orange,
+                                            onPressed: () {
+                                              userInputHolder.clear();
+                                              newFileName = null;
+                                              Navigator.pop(context);
+                                            },
+                                          ),
+                                        ),
+                                        Center(
+                                          child: FlatButton(
+                                            child: Text("Create"),
+                                            textColor: Colors.orange,
+                                            onPressed: () async {
+                                              //User must create folder name
+                                              if((newFileName == null) || (newFileName == "")) {
+                                                setState(() {
+                                                  return showDialog(
+                                                    context: context,
+                                                    barrierDismissible: true,
+                                                    builder: (BuildContext context) {
+                                                      return AlertDialog(
+                                                        title: Text(
+                                                            "File name required"
+                                                        ),
+                                                        titleTextStyle: TextStyle(
+                                                          color: Colors.orange,
+                                                          fontSize: 20.0,
+                                                        ),
+                                                        actions: <Widget>[
+                                                          Center(
+                                                            child: FlatButton(
+                                                              child: Text(
+                                                                  "Ok"
+                                                              ),
+                                                              textColor: Colors.orange,
+                                                              onPressed: () {
+                                                                userInputHolder.clear();
+                                                                newFileName = null;
+                                                                Navigator.pop(context);
+                                                              },
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      );
                                                     },
-                                                  ),
-                                                ),
-                                                Center(
-                                                  child: FlatButton(
-                                                    child: Text("Create"),
-                                                    textColor: Colors.orange,
-                                                    onPressed: () async {
-                                                      //User must create folder name
-                                                      if((newFileName == null) || (newFileName == "")) {
-                                                        setState(() {
-                                                          return showDialog(
-                                                            context: context,
-                                                            barrierDismissible: true,
-                                                            builder: (BuildContext context) {
-                                                              return AlertDialog(
-                                                                title: Text(
-                                                                    "File name required"
-                                                                ),
-                                                                titleTextStyle: TextStyle(
-                                                                  color: Colors.orange,
-                                                                  fontSize: 20.0,
-                                                                ),
-                                                                actions: <Widget>[
-                                                                  Center(
-                                                                    child: FlatButton(
-                                                                      child: Text(
-                                                                          "Ok"
-                                                                      ),
-                                                                      textColor: Colors.orange,
-                                                                      onPressed: () {
-                                                                        userInputHolder.clear();
-                                                                        newFileName = null;
-                                                                        Navigator.pop(context);
-                                                                      },
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              );
-                                                            },
-                                                          );
-                                                        });
-                                                      };
-                                                      var owner = loggedInUser.email;
-                                                      //DocumentReference folderName = _fireStore.collection('folders').document(owner+newFolderName);
-                                                      //print(folderName.path);
-                                                      var fileNameExists = false;
-                                                      var fileNames = await _fireStore.collection('test').getDocuments();
-                                                      for(var fileName in fileNames.documents) {
-                                                        if(fileName.documentID == (owner + newFileName)) {
-                                                          fileNameExists = !fileNameExists;
-                                                        }
-                                                      }
-                                                      if (fileNameExists) {
-                                                        setState(() {
-                                                          return showDialog(
-                                                            context: context,
-                                                            barrierDismissible: true,
-                                                            builder: (BuildContext context) {
-                                                              return AlertDialog(
-                                                                title: Text(
-                                                                    "File Name Already Exists"
-                                                                ),
-                                                                titleTextStyle: TextStyle(
-                                                                  color: Colors.orange,
-                                                                  fontSize: 20.0,
-                                                                ),
-                                                                actions: <Widget>[
-                                                                  Center(
-                                                                    child: FlatButton(
-                                                                      child: Text(
-                                                                          "Ok"
-                                                                      ),
-                                                                      textColor: Colors.orange,
-                                                                      onPressed: () {
-                                                                        userInputHolder.clear();
-                                                                        newFileName = null;
-                                                                        Navigator.pop(context);
-                                                                      },
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              );
-                                                            },
-                                                          );
-                                                        });
-                                                      } else {
-                                                        //BUILD ENCRYPTION ALGORITHM BEFORE STORING.
-                                                        _fireStore.collection(
-                                                            'test')
-                                                            .document(owner +
-                                                            newFileName)
-                                                            .setData({
-                                                          "owner": owner,
-                                                          "name": newFileName,
-                                                          "isFolder": false,
-                                                        });
-                                                        userInputHolder.clear();
-                                                        newFileName = null;
-                                                        Navigator.pop(context);
-                                                        //NEED THIS SECOND CALL. DON'T REMOVE
-                                                        Navigator.pop(context);
-                                                      }
+                                                  );
+                                                });
+                                              };
+                                              var owner = loggedInUser.email;
+                                              //DocumentReference folderName = _fireStore.collection('folders').document(owner+newFolderName);
+                                              //print(folderName.path);
+                                              var fileNameExists = false;
+                                              var fileNames = await _fireStore.collection('test').getDocuments();
+                                              for(var fileName in fileNames.documents) {
+                                                if(fileName.documentID == (owner + newFileName)) {
+                                                  fileNameExists = !fileNameExists;
+                                                }
+                                              }
+                                              if (fileNameExists) {
+                                                setState(() {
+                                                  return showDialog(
+                                                    context: context,
+                                                    barrierDismissible: true,
+                                                    builder: (BuildContext context) {
+                                                      return AlertDialog(
+                                                        title: Text(
+                                                            "File Name Already Exists"
+                                                        ),
+                                                        titleTextStyle: TextStyle(
+                                                          color: Colors.orange,
+                                                          fontSize: 20.0,
+                                                        ),
+                                                        actions: <Widget>[
+                                                          Center(
+                                                            child: FlatButton(
+                                                              child: Text(
+                                                                  "Ok"
+                                                              ),
+                                                              textColor: Colors.orange,
+                                                              onPressed: () {
+                                                                userInputHolder.clear();
+                                                                newFileName = null;
+                                                                Navigator.pop(context);
+                                                              },
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      );
                                                     },
-                                                  ),
-                                                ),
-                                              ],
-                                            );
-                                          },
-                                        );
-                                      },
-                                      //padding: EdgeInsets.symmetric(
-                                        //horizontal: 72.0
-                                      //),
-                                    ),
-                                  ),
-                                ],);
+                                                  );
+                                                });
+                                              } else {
+                                                //BUILD ENCRYPTION ALGORITHM BEFORE STORING.
+                                                _fireStore.collection(
+                                                    'test')
+                                                    .document(owner +
+                                                    newFileName)
+                                                    .setData({
+                                                  "owner": owner,
+                                                  "name": newFileName,
+                                                  "isFolder": false,
+                                                });
+                                                userInputHolder.clear();
+                                                newFileName = null;
+                                                Navigator.pop(context);
+                                                //NEED THIS SECOND CALL. DON'T REMOVE
+                                                Navigator.pop(context);
+                                              }
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
                               },
-                            );
-                          },
-                        ),
-                    ),
-                  ),
-                ],
+                              //padding: EdgeInsets.symmetric(
+                              //horizontal: 72.0
+                              //),
+                            ),
+                          ),
+                        ],);
+                      },
+                  );
+                },
               ),
             ),
           ),
+        ),
       ),
     );
   }
-  deleteFolder(Function folderDeleted) async {
-    await _fireStore.collection('files').document('test@gmail.comtest').delete();
-    print('sucessfully deleted test file');
-    await _fireStore.collection('files').document('test@gmail.com').delete();
-    print('sucessfully deleted \'\' file');
-
+  deleteFolder(String ownerEmail, String folderName) async {
+    await _fireStore.collection('test').document(ownerEmail+folderName).delete();
   }
 }
 

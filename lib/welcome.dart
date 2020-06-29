@@ -125,7 +125,6 @@ String password;
       //resizeToAvoidBottomInset: false,
       body: ModalProgressHUD(
         inAsyncCall: showSpinner,
-
         child: Center(
           child: Container(
             color: Colors.white,
