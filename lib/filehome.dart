@@ -113,6 +113,7 @@ class _filePage extends State<FilePage> {
                     stream: _fireStore.collection('test').snapshots(),
                     builder: (context, snapshot){
                       //add loading screen here
+                      bool hasData = false;
                       if (snapshot.hasData) {
                         List<Widget> homeScreenWidgets = [];
                         homeScreenWidgets.add(
@@ -122,6 +123,7 @@ class _filePage extends State<FilePage> {
                         );
                         final files = snapshot.data.documents;
                         for (var file in files) {
+                          hasData = !hasData;
                           final dataName = file.data["name"];
                           final isFolder = file.data["isFolder"];
                           if (isFolder) {
@@ -194,7 +196,6 @@ class _filePage extends State<FilePage> {
                                             Icons.delete,
                                           ),
                                           onPressed: () {
-                                            print('here');
                                             deleteFolder(loggedInUser.email, '$dataName');
                                           },
                                         ),
@@ -278,7 +279,6 @@ class _filePage extends State<FilePage> {
                                             Icons.delete,
                                           ),
                                           onPressed: () {
-                                            print('here');
                                             deleteFolder(loggedInUser.email, '$dataName');
                                           },
                                         ),
@@ -298,9 +298,29 @@ class _filePage extends State<FilePage> {
                               height: 20.0,
                             ),
                           );
-                        };
-                        if(homeScreenWidgets.isEmpty) {
-                          //add loading screen before showing this!
+                        }
+                        if(!hasData){
+                          return Column(
+                            children: <Widget>[
+                              SizedBox(
+                                height: 15.0,
+                              ),
+                              Text(
+                                "You Have No Files",
+                                style: TextStyle(
+                                  fontSize: 15.0,
+                                ),
+                              ),
+                            ],
+                          );
+                        } else {
+                            return Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children:
+                              homeScreenWidgets,
+                            );
+                        }
+                      } else {
                           return Column(
                             children: <Widget>[
                               SizedBox(
@@ -314,26 +334,6 @@ class _filePage extends State<FilePage> {
                               ),
                             ],
                           );
-                        }
-                        return Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children:
-                            homeScreenWidgets,
-                        );
-                      } else {
-                        return Column(
-                          children: <Widget>[
-                            SizedBox(
-                              height: 15.0,
-                            ),
-                            Text(
-                                "You Have No Files",
-                                style: TextStyle(
-                                  fontSize: 15.0,
-                                ),
-                            ),
-                          ],
-                        );
                       }
                     },
                   ),
