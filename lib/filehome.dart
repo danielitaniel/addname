@@ -1,3 +1,5 @@
+//import 'dart:html';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -49,7 +51,7 @@ class _filePage extends State<FilePage> {
   var userInputHolder = TextEditingController();
   String newFolderName;
   String newFileName;
-  List filesToUpload;
+  File fileToUpload;
   void initState() {
     super.initState();
     getCurrentUser();
@@ -127,6 +129,7 @@ class _filePage extends State<FilePage> {
                         final files = snapshot.data.documents;
                         for (var file in files) {
                           final dataName = file.data["name"];
+                          final filePath = file.data["path"];
                           final isFolder = file.data["isFolder"];
                           if (isFolder) {
                             final folderWidget = Stack(
@@ -238,19 +241,16 @@ class _filePage extends State<FilePage> {
                                                         ),
                                                         actions: <Widget>[
                                                           FlatButton(
-                                                            child: Text("Yes"),
+                                                            child: Text("No"),
                                                             onPressed: () {
-                                                              deleteFolder(
-                                                                  loggedInUser
-                                                                      .email,
-                                                                  '$dataName');
                                                               Navigator.pop(
                                                                   context);
                                                             },
                                                           ),
                                                           FlatButton(
-                                                            child: Text("No"),
+                                                            child: Text("Yes"),
                                                             onPressed: () {
+                                                              deleteData(loggedInUser.email, '$dataName');
                                                               Navigator.pop(
                                                                   context);
                                                             },
@@ -381,21 +381,17 @@ class _filePage extends State<FilePage> {
                                                     ),
                                                     actions: <Widget>[
                                                       FlatButton(
-                                                        child: Text("Yes"),
+                                                        child: Text("No"),
                                                         onPressed: () {
-                                                          deleteFolder(
-                                                              loggedInUser
-                                                                  .email,
-                                                              '$dataName');
                                                           Navigator.pop(
                                                               context);
                                                         },
                                                       ),
                                                       FlatButton(
-                                                        child: Text("No"),
+                                                        child: Text("Yes"),
                                                         onPressed: () {
-                                                          Navigator.pop(
-                                                              context);
+                                                          deleteData(loggedInUser.email, '$dataName', filePath);
+                                                          Navigator.pop(context);
                                                         },
                                                       ),
                                                     ],
@@ -632,7 +628,7 @@ class _filePage extends State<FilePage> {
                                   barrierDismissible: true,
                                   builder: (BuildContext context) {
                                     return AlertDialog(
-                                      title: Text("New File"),
+                                      title: Text("New File(s)"),
                                       titleTextStyle: TextStyle(
                                         color: Colors.orange,
                                       ),
@@ -670,12 +666,44 @@ class _filePage extends State<FilePage> {
                                                 child: Text("Upload"),
                                                 textColor: Colors.orange,
                                                 onPressed: () async {
-//                                              userInputHolder.clear();
-//                                              newFileName = null;
-//                                              Navigator.pop(context);
-                                                    filesToUpload = await FilePicker.getMultiFile(
-                                                      type: FileType.custom,
-                                                    );
+                                                    fileToUpload = await FilePicker.getFile(type: FileType.any);
+                                                    if(fileToUpload == null) {
+                                                      setState(() {
+                                                        return showDialog(
+                                                          context: context,
+                                                          barrierDismissible: true,
+                                                          builder: (BuildContext context) {
+                                                            return AlertDialog(
+                                                              title: Text(
+                                                                  "File Required"
+                                                              ),
+                                                              titleTextStyle: TextStyle(
+                                                                color: Colors.orange,
+                                                                fontSize: 20.0,
+                                                              ),
+                                                              actions: <Widget>[
+                                                                Center(
+                                                                  child: FlatButton(
+                                                                    child: Text(
+                                                                        "Ok"
+                                                                    ),
+                                                                    textColor: Colors.orange,
+                                                                    onPressed: () {
+                                                                      userInputHolder.clear();
+                                                                      newFileName = null;
+                                                                      Navigator.pop(context);
+                                                                    },
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            );
+                                                          },
+                                                        );
+                                                      });
+                                                    } else {
+                                                      userInputHolder.text = fileToUpload.toString();
+                                                      newFileName = fileToUpload.toString();
+                                                    }
                                                 },
                                               ),
                                             ),
@@ -684,7 +712,7 @@ class _filePage extends State<FilePage> {
                                                 child: Text("Create"),
                                                 textColor: Colors.orange,
                                                 onPressed: () async {
-                                                  if(filesToUpload == null) {
+                                                  if(TextInputType.text == null) {
                                                     setState(() {
                                                       return showDialog(
                                                         context: context,
@@ -692,7 +720,7 @@ class _filePage extends State<FilePage> {
                                                         builder: (BuildContext context) {
                                                           return AlertDialog(
                                                             title: Text(
-                                                                "File Required"
+                                                                "File Name Required"
                                                             ),
                                                             titleTextStyle: TextStyle(
                                                               color: Colors.orange,
@@ -752,7 +780,7 @@ class _filePage extends State<FilePage> {
                                                         },
                                                       );
                                                     });
-                                                  };
+                                                  }
                                                   var owner = loggedInUser.email;
                                                   //DocumentReference folderName = _fireStore.collection('folders').document(owner+newFolderName);
                                                   //print(folderName.path);
@@ -805,11 +833,15 @@ class _filePage extends State<FilePage> {
                                                         .setData({
                                                       "owner": owner,
                                                       "name": newFileName,
+                                                      "path": fileToUpload.path,
                                                       "isFolder": false,
                                                     });
+                                                    StorageUploadTask uploadTask = _fireStorage.ref().child(fileToUpload.path).putFile(fileToUpload);
+                                                    await uploadTask.onComplete;
                                                     //final StorageReference storageRef = _fireStorage.ref().child(newFileName);
                                                     userInputHolder.clear();
                                                     newFileName = null;
+                                                    fileToUpload = null;
                                                     Navigator.pop(context);
                                                     //NEED THIS SECOND CALL. DON'T REMOVE
                                                     Navigator.pop(context);
@@ -840,8 +872,12 @@ class _filePage extends State<FilePage> {
       ),
     );
   }
-  deleteFolder(String ownerEmail, String folderName) async {
+  deleteData(String ownerEmail, String folderName, [String path]) async {
     await _fireStore.collection('test').document(ownerEmail+folderName).delete();
+    if(path!=null) {
+      print('deleted from fireStorage');
+      await _fireStorage.ref().child(path).delete();
+    }
   }
 }
 
