@@ -46,12 +46,14 @@ class _filePage extends State<FilePage> {
   final _authentication = FirebaseAuth.instance;
   FirebaseUser loggedInUser;
   final _fireStorage = FirebaseStorage.instance;
-  final _fireStore = Firestore.instance; 
+  final _fireStore = Firestore.instance;
   bool showSpinner = false;
   var userInputHolder = TextEditingController();
   String newFolderName;
   String newFileName;
   File fileToUpload;
+  var folderAndFileNames = [];
+
   void initState() {
     super.initState();
     getCurrentUser();
@@ -60,7 +62,7 @@ class _filePage extends State<FilePage> {
   void getCurrentUser() async {
     try {
       final user = await _authentication.currentUser();
-      if(user != null) {
+      if (user != null) {
         loggedInUser = user;
       }
     } catch (exception) {
@@ -74,6 +76,10 @@ class _filePage extends State<FilePage> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: ModalProgressHUD(
+        progressIndicator: CircularProgressIndicator(
+          backgroundColor: Colors.white,
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
+        ),
         inAsyncCall: showSpinner,
         child: Scaffold(
           appBar: AppBar(
@@ -82,11 +88,11 @@ class _filePage extends State<FilePage> {
               ),
               actions: [IconButton(
                 icon: Icon(Icons.search),
-                onPressed: () {
+                onPressed: () async {
                   setState(() {
                     showSpinner = true;
                   });
-                  showSearch(context: context, delegate: DataSearch());
+                  await showSearch(context: context, delegate: DataSearch(folderAndFileNames));
                   setState(() {
                     showSpinner = false;
                   });
@@ -94,12 +100,12 @@ class _filePage extends State<FilePage> {
               ),
                 IconButton(
                   icon: Icon(Icons.exit_to_app, color: Colors.white),
-                  onPressed: () {
+                  onPressed: () async {
                     setState(() {
                       showSpinner = true;
                     });
                     _authentication.signOut();
-                    Navigator.pushNamed(context, WelcomePage.title);
+                    await Navigator.pushNamed(context, WelcomePage.title);
                     setState(() {
                       showSpinner = false;
                     });
@@ -110,14 +116,14 @@ class _filePage extends State<FilePage> {
               title: Text("Files")
           ),
           body: SafeArea(
-            child: SingleChildScrollView (
+            child: SingleChildScrollView(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   StreamBuilder<QuerySnapshot>(
                     stream: _fireStore.collection('test').snapshots(),
-                    builder: (context, snapshot){
+                    builder: (context, snapshot) {
                       //add loading screen here
                       List<Widget> homeScreenWidgets = [];
                       if (snapshot.hasData) {
@@ -131,6 +137,9 @@ class _filePage extends State<FilePage> {
                           final dataName = file.data["name"];
                           final filePath = file.data["path"];
                           final isFolder = file.data["isFolder"];
+                          if(!folderAndFileNames.contains(dataName)) {
+                            folderAndFileNames.add(dataName);
+                          }
                           if (isFolder) {
                             final folderWidget = Stack(
                               children: <Widget>[
@@ -167,8 +176,8 @@ class _filePage extends State<FilePage> {
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                           ),
-                                          onPressed: () {
-
+                                          onPressed: () async {
+//                                            String cloudBucket = await _fireStorage.ref().child(filePath).getBucket();
                                           },
                                         ),
                                       ),
@@ -204,61 +213,69 @@ class _filePage extends State<FilePage> {
                                             color: Colors.orange,
                                           ),
                                           onPressed: () {
-                                              return showDialog(
-                                                  context: context,
-                                                  barrierDismissible: true,
-                                                  builder: (
-                                                      BuildContext context) {
-                                                      return AlertDialog(
-                                                        title: RichText(
-                                                          text: TextSpan(
-                                                            children: [
-                                                              TextSpan(
-                                                                text: "Are you sure you want to delete the folder ",
-                                                                style: TextStyle(
-                                                                  fontSize: 20.0,
-                                                                  color: Colors.black,
-                                                                ),
-                                                              ),
-                                                              TextSpan(
-                                                                  text: dataName,
-                                                                  style: TextStyle(
-                                                                    fontSize: 20.0,
-                                                                    color: Colors.black,
-                                                                    fontStyle: FontStyle.italic,
-                                                                    fontWeight: FontWeight.bold,
-                                                                  ),
-                                                              ),
-                                                              TextSpan(
-                                                                text: "?",
-                                                                style: TextStyle(
-                                                                  fontSize: 20.0,
-                                                                  color: Colors.black,
-                                                                ),
-                                                              ),
-                                                            ],
+                                            return showDialog(
+                                                context: context,
+                                                barrierDismissible: true,
+                                                builder: (
+                                                    BuildContext context) {
+                                                  return AlertDialog(
+                                                    title: RichText(
+                                                      text: TextSpan(
+                                                        children: [
+                                                          TextSpan(
+                                                            text: "Are you sure you want to delete the folder ",
+                                                            style: TextStyle(
+                                                              fontSize: 20.0,
+                                                              color: Colors
+                                                                  .black,
+                                                            ),
                                                           ),
-                                                        ),
-                                                        actions: <Widget>[
-                                                          FlatButton(
-                                                            child: Text("No"),
-                                                            onPressed: () {
-                                                              Navigator.pop(
-                                                                  context);
-                                                            },
+                                                          TextSpan(
+                                                            text: dataName,
+                                                            style: TextStyle(
+                                                              fontSize: 20.0,
+                                                              color: Colors
+                                                                  .black,
+                                                              fontStyle: FontStyle
+                                                                  .italic,
+                                                              fontWeight: FontWeight
+                                                                  .bold,
+                                                            ),
                                                           ),
-                                                          FlatButton(
-                                                            child: Text("Yes"),
-                                                            onPressed: () {
-                                                              deleteData(loggedInUser.email, '$dataName');
-                                                              Navigator.pop(
-                                                                  context);
-                                                            },
+                                                          TextSpan(
+                                                            text: "?",
+                                                            style: TextStyle(
+                                                              fontSize: 20.0,
+                                                              color: Colors
+                                                                  .black,
+                                                            ),
                                                           ),
                                                         ],
-                                                      );
-                                                  }
-                                              );
+                                                      ),
+                                                    ),
+                                                    actions: <Widget>[
+                                                      FlatButton(
+                                                        child: Text("No"),
+                                                        onPressed: () {
+                                                          Navigator.pop(
+                                                              context);
+                                                        },
+                                                      ),
+                                                      FlatButton(
+                                                        child: Text("Yes"),
+                                                        onPressed: () {
+                                                          deleteData(
+                                                              loggedInUser
+                                                                  .email,
+                                                              '$dataName');
+                                                          Navigator.pop(
+                                                              context);
+                                                        },
+                                                      ),
+                                                    ],
+                                                  );
+                                                }
+                                            );
                                           },
                                         ),
                                       ),
@@ -307,8 +324,10 @@ class _filePage extends State<FilePage> {
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                           ),
-                                          onPressed: () {
-
+                                          onPressed: () async {
+//                                            List cloudBucket = await _fireStorage
+//                                                .ref().child(filePath).getData(
+//                                                1);
                                           },
                                         ),
                                       ),
@@ -357,23 +376,28 @@ class _filePage extends State<FilePage> {
                                                             text: "Are you sure you want to delete the file ",
                                                             style: TextStyle(
                                                               fontSize: 20.0,
-                                                              color: Colors.black,
+                                                              color: Colors
+                                                                  .black,
                                                             ),
                                                           ),
                                                           TextSpan(
                                                             text: dataName,
                                                             style: TextStyle(
                                                               fontSize: 20.0,
-                                                              color: Colors.black,
-                                                              fontStyle: FontStyle.italic,
-                                                              fontWeight: FontWeight.bold,
+                                                              color: Colors
+                                                                  .black,
+                                                              fontStyle: FontStyle
+                                                                  .italic,
+                                                              fontWeight: FontWeight
+                                                                  .bold,
                                                             ),
                                                           ),
                                                           TextSpan(
                                                             text: "?",
                                                             style: TextStyle(
                                                               fontSize: 20.0,
-                                                              color: Colors.black,
+                                                              color: Colors
+                                                                  .black,
                                                             ),
                                                           ),
                                                         ],
@@ -390,8 +414,13 @@ class _filePage extends State<FilePage> {
                                                       FlatButton(
                                                         child: Text("Yes"),
                                                         onPressed: () {
-                                                          deleteData(loggedInUser.email, '$dataName', filePath);
-                                                          Navigator.pop(context);
+                                                          deleteData(
+                                                              loggedInUser
+                                                                  .email,
+                                                              '$dataName',
+                                                              filePath);
+                                                          Navigator.pop(
+                                                              context);
                                                         },
                                                       ),
                                                     ],
@@ -418,7 +447,7 @@ class _filePage extends State<FilePage> {
                           );
                         }
                       }
-                      if(!snapshot.hasData || snapshot.data.documents.isEmpty){
+                      if (!snapshot.hasData || snapshot.data.documents.isEmpty) {
                         return Column(
                           children: <Widget>[
                             SizedBox(
@@ -444,8 +473,8 @@ class _filePage extends State<FilePage> {
 //                SizedBox(
 //                  height: 10.0,
 //                ),
-                  ],
-                ),
+                ],
+              ),
             ),
           ),
           floatingActionButton: Container(
@@ -455,8 +484,8 @@ class _filePage extends State<FilePage> {
               child: FloatingActionButton(
                 backgroundColor: Colors.orange,
                 child: Icon(
-                    Icons.add,
-                    size: 35.0,
+                  Icons.add,
+                  size: 35.0,
                 ),
 //            child: Icon(
 //              Icons.add_circle,
@@ -469,7 +498,7 @@ class _filePage extends State<FilePage> {
                     barrierDismissible: true,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                        actions:<Widget>[
+                        actions: <Widget>[
                           Center(
                             child: FlatButton(
                               child: Text(Constants.new_folder),
@@ -497,7 +526,7 @@ class _filePage extends State<FilePage> {
                                             newFolderName = value;
                                           }
                                       ),
-                                      actions:<Widget>[
+                                      actions: <Widget>[
                                         Center(
                                           child: FlatButton(
                                             child: Text("Cancel"),
@@ -515,12 +544,13 @@ class _filePage extends State<FilePage> {
                                             textColor: Colors.orange,
                                             onPressed: () async {
                                               //User must create folder name
-                                              if((newFolderName == null) || (newFolderName == "")) {
+                                              if ((newFolderName == null) || (newFolderName == "")) {
                                                 setState(() {
                                                   return showDialog(
                                                     context: context,
                                                     barrierDismissible: true,
-                                                    builder: (BuildContext context) {
+                                                    builder: (
+                                                        BuildContext context) {
                                                       return AlertDialog(
                                                         title: Text(
                                                             "Folder name required"
@@ -535,11 +565,15 @@ class _filePage extends State<FilePage> {
                                                               child: Text(
                                                                   "Ok"
                                                               ),
-                                                              textColor: Colors.orange,
+                                                              textColor: Colors
+                                                                  .orange,
                                                               onPressed: () {
-                                                                userInputHolder.clear();
-                                                                newFolderName = null;
-                                                                Navigator.pop(context);
+                                                                userInputHolder
+                                                                    .clear();
+                                                                newFolderName =
+                                                                null;
+                                                                Navigator.pop(
+                                                                    context);
                                                               },
                                                             ),
                                                           ),
@@ -550,13 +584,14 @@ class _filePage extends State<FilePage> {
                                                 });
                                               };
                                               var owner = loggedInUser.email;
-                                              //DocumentReference folderName = _fireStore.collection('folders').document(owner+newFolderName);
-                                              //print(folderName.path);
                                               var folderNameExists = false;
                                               var dataStorage = await _fireStore.collection('test').getDocuments();
-                                              for(var folderName in dataStorage.documents) {
-                                                if(folderName.documentID == (owner + newFolderName)) {
-                                                  folderNameExists = !folderNameExists;
+                                              for (var folderName in dataStorage
+                                                  .documents) {
+                                                if (folderName.documentID ==
+                                                    (owner + newFolderName)) {
+                                                  folderNameExists =
+                                                  !folderNameExists;
                                                 }
                                               }
                                               if (folderNameExists) {
@@ -564,7 +599,8 @@ class _filePage extends State<FilePage> {
                                                   return showDialog(
                                                     context: context,
                                                     barrierDismissible: true,
-                                                    builder: (BuildContext context) {
+                                                    builder: (
+                                                        BuildContext context) {
                                                       return AlertDialog(
                                                         title: Text(
                                                             "Folder Name Already Exists"
@@ -579,11 +615,15 @@ class _filePage extends State<FilePage> {
                                                               child: Text(
                                                                   "Ok"
                                                               ),
-                                                              textColor: Colors.orange,
+                                                              textColor: Colors
+                                                                  .orange,
                                                               onPressed: () {
-                                                                userInputHolder.clear();
-                                                                newFolderName = null;
-                                                                Navigator.pop(context);
+                                                                userInputHolder
+                                                                    .clear();
+                                                                newFolderName =
+                                                                null;
+                                                                Navigator.pop(
+                                                                    context);
                                                               },
                                                             ),
                                                           ),
@@ -646,9 +686,10 @@ class _filePage extends State<FilePage> {
                                             newFileName = value;
                                           }
                                       ),
-                                      actions:[
+                                      actions: [
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          mainAxisAlignment: MainAxisAlignment
+                                              .spaceBetween,
                                           children: <Widget>[
                                             Center(
                                               child: FlatButton(
@@ -666,64 +707,23 @@ class _filePage extends State<FilePage> {
                                                 child: Text("Upload"),
                                                 textColor: Colors.orange,
                                                 onPressed: () async {
-                                                    fileToUpload = await FilePicker.getFile(type: FileType.any);
-                                                    if(fileToUpload == null) {
-                                                      setState(() {
-                                                        return showDialog(
-                                                          context: context,
-                                                          barrierDismissible: true,
-                                                          builder: (BuildContext context) {
-                                                            return AlertDialog(
-                                                              title: Text(
-                                                                  "File Required"
-                                                              ),
-                                                              titleTextStyle: TextStyle(
-                                                                color: Colors.orange,
-                                                                fontSize: 20.0,
-                                                              ),
-                                                              actions: <Widget>[
-                                                                Center(
-                                                                  child: FlatButton(
-                                                                    child: Text(
-                                                                        "Ok"
-                                                                    ),
-                                                                    textColor: Colors.orange,
-                                                                    onPressed: () {
-                                                                      userInputHolder.clear();
-                                                                      newFileName = null;
-                                                                      Navigator.pop(context);
-                                                                    },
-                                                                  ),
-                                                                ),
-                                                              ],
-                                                            );
-                                                          },
-                                                        );
-                                                      });
-                                                    } else {
-                                                      userInputHolder.text = fileToUpload.toString();
-                                                      newFileName = fileToUpload.toString();
-                                                    }
-                                                },
-                                              ),
-                                            ),
-                                            Center(
-                                              child: FlatButton(
-                                                child: Text("Create"),
-                                                textColor: Colors.orange,
-                                                onPressed: () async {
-                                                  if(TextInputType.text == null) {
+                                                  fileToUpload =
+                                                  await FilePicker.getFile(
+                                                      type: FileType.any);
+                                                  if (fileToUpload == null) {
                                                     setState(() {
                                                       return showDialog(
                                                         context: context,
                                                         barrierDismissible: true,
-                                                        builder: (BuildContext context) {
+                                                        builder: (
+                                                            BuildContext context) {
                                                           return AlertDialog(
                                                             title: Text(
-                                                                "File Name Required"
+                                                                "File Required"
                                                             ),
                                                             titleTextStyle: TextStyle(
-                                                              color: Colors.orange,
+                                                              color: Colors
+                                                                  .orange,
                                                               fontSize: 20.0,
                                                             ),
                                                             actions: <Widget>[
@@ -732,90 +732,16 @@ class _filePage extends State<FilePage> {
                                                                   child: Text(
                                                                       "Ok"
                                                                   ),
-                                                                  textColor: Colors.orange,
+                                                                  textColor: Colors
+                                                                      .orange,
                                                                   onPressed: () {
-                                                                    userInputHolder.clear();
-                                                                    newFileName = null;
-                                                                    Navigator.pop(context);
-                                                                  },
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          );
-                                                        },
-                                                      );
-                                                    });
-                                                  }
-                                                  //User must create file name
-                                                  if((newFileName == null) || (newFileName == "")) {
-                                                    setState(() {
-                                                      return showDialog(
-                                                        context: context,
-                                                        barrierDismissible: true,
-                                                        builder: (BuildContext context) {
-                                                          return AlertDialog(
-                                                            title: Text(
-                                                                "File name required"
-                                                            ),
-                                                            titleTextStyle: TextStyle(
-                                                              color: Colors.orange,
-                                                              fontSize: 20.0,
-                                                            ),
-                                                            actions: <Widget>[
-                                                              Center(
-                                                                child: FlatButton(
-                                                                  child: Text(
-                                                                      "Ok"
-                                                                  ),
-                                                                  textColor: Colors.orange,
-                                                                  onPressed: () {
-                                                                    userInputHolder.clear();
-                                                                    newFileName = null;
-                                                                    Navigator.pop(context);
-                                                                  },
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          );
-                                                        },
-                                                      );
-                                                    });
-                                                  }
-                                                  var owner = loggedInUser.email;
-                                                  //DocumentReference folderName = _fireStore.collection('folders').document(owner+newFolderName);
-                                                  //print(folderName.path);
-                                                  var fileNameExists = false;
-                                                  var fileNames = await _fireStore.collection('test').getDocuments();
-                                                  for(var fileName in fileNames.documents) {
-                                                    if(fileName.documentID == (owner + newFileName)) {
-                                                      fileNameExists = !fileNameExists;
-                                                    }
-                                                  }
-                                                  if (fileNameExists) {
-                                                    setState(() {
-                                                      return showDialog(
-                                                        context: context,
-                                                        barrierDismissible: true,
-                                                        builder: (BuildContext context) {
-                                                          return AlertDialog(
-                                                            title: Text(
-                                                                "File Name Already Exists"
-                                                            ),
-                                                            titleTextStyle: TextStyle(
-                                                              color: Colors.orange,
-                                                              fontSize: 20.0,
-                                                            ),
-                                                            actions: <Widget>[
-                                                              Center(
-                                                                child: FlatButton(
-                                                                  child: Text(
-                                                                      "Ok"
-                                                                  ),
-                                                                  textColor: Colors.orange,
-                                                                  onPressed: () {
-                                                                    userInputHolder.clear();
-                                                                    newFileName = null;
-                                                                    Navigator.pop(context);
+                                                                    userInputHolder
+                                                                        .clear();
+                                                                    newFileName =
+                                                                    null;
+                                                                    Navigator
+                                                                        .pop(
+                                                                        context);
                                                                   },
                                                                 ),
                                                               ),
@@ -825,26 +751,211 @@ class _filePage extends State<FilePage> {
                                                       );
                                                     });
                                                   } else {
-                                                    //BUILD ENCRYPTION ALGORITHM BEFORE STORING.
-                                                    _fireStore.collection(
-                                                        'test')
-                                                        .document(owner +
-                                                        newFileName)
-                                                        .setData({
-                                                      "owner": owner,
-                                                      "name": newFileName,
-                                                      "path": fileToUpload.path,
-                                                      "isFolder": false,
+                                                    var longStringame = fileToUpload.toString();
+                                                    newFileName = longStringame.substring(longStringame.lastIndexOf("/" ) +1, longStringame.length-1);
+                                                    userInputHolder.text = newFileName;
+                                                  }
+                                                },
+                                              ),
+                                            ),
+                                            Center(
+                                              child: FlatButton(
+                                                child: Text("Create"),
+                                                textColor: Colors.orange,
+                                                onPressed: () async {
+                                                  if (TextInputType.text ==
+                                                      null) {
+                                                    setState(() {
+                                                      return showDialog(
+                                                        context: context,
+                                                        barrierDismissible: true,
+                                                        builder: (
+                                                            BuildContext context) {
+                                                          return AlertDialog(
+                                                            title: Text(
+                                                                "File Name Required"
+                                                            ),
+                                                            titleTextStyle: TextStyle(
+                                                              color: Colors
+                                                                  .orange,
+                                                              fontSize: 20.0,
+                                                            ),
+                                                            actions: <Widget>[
+                                                              Center(
+                                                                child: FlatButton(
+                                                                  child: Text(
+                                                                      "Ok"
+                                                                  ),
+                                                                  textColor: Colors
+                                                                      .orange,
+                                                                  onPressed: () {
+                                                                    userInputHolder
+                                                                        .clear();
+                                                                    newFileName =
+                                                                    null;
+                                                                    Navigator
+                                                                        .pop(
+                                                                        context);
+                                                                  },
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          );
+                                                        },
+                                                      );
                                                     });
-                                                    StorageUploadTask uploadTask = _fireStorage.ref().child(fileToUpload.path).putFile(fileToUpload);
-                                                    await uploadTask.onComplete;
-                                                    //final StorageReference storageRef = _fireStorage.ref().child(newFileName);
+                                                  }
+                                                  Navigator.pop(context);
+                                                  //NEED THIS SECOND CALL. DON'T REMOVE
+                                                  Navigator.pop(context);
+                                                  //User must create file name
+                                                  if ((newFileName == null) ||
+                                                      (newFileName == "")) {
+                                                    setState(() {
+                                                      return showDialog(
+                                                        context: context,
+                                                        barrierDismissible: true,
+                                                        builder: (
+                                                            BuildContext context) {
+                                                          return AlertDialog(
+                                                            title: Text(
+                                                                "File name required"
+                                                            ),
+                                                            titleTextStyle: TextStyle(
+                                                              color: Colors
+                                                                  .orange,
+                                                              fontSize: 20.0,
+                                                            ),
+                                                            actions: <Widget>[
+                                                              Center(
+                                                                child: FlatButton(
+                                                                  child: Text(
+                                                                      "Ok"
+                                                                  ),
+                                                                  textColor: Colors
+                                                                      .orange,
+                                                                  onPressed: () {
+                                                                    userInputHolder
+                                                                        .clear();
+                                                                    newFileName =
+                                                                    null;
+                                                                    Navigator
+                                                                        .pop(
+                                                                        context);
+                                                                  },
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          );
+                                                        },
+                                                      );
+                                                    });
+                                                  }
+
+                                                  var owner = loggedInUser.email;
+                                                  var fileNameExists = false;
+                                                  var fileNames = await _fireStore
+                                                      .collection('test')
+                                                      .getDocuments();
+
+                                                  //THIS IS NOT EFFICIENT. NEED TO RE-WRITE
+                                                  for (var fileName in fileNames
+                                                      .documents) {
+                                                    if (fileName.documentID ==
+                                                        (owner + newFileName)) {
+                                                      fileNameExists =
+                                                      !fileNameExists;
+                                                    }
+                                                  }
+                                                  if (fileNameExists) {
+                                                    setState(() {
+                                                      return showDialog(
+                                                        context: context,
+                                                        barrierDismissible: true,
+                                                        builder: (
+                                                            BuildContext context) {
+                                                          return AlertDialog(
+                                                            title: Text(
+                                                                "File Name Already Exists"
+                                                            ),
+                                                            titleTextStyle: TextStyle(
+                                                              color: Colors
+                                                                  .orange,
+                                                              fontSize: 20.0,
+                                                            ),
+                                                            actions: <Widget>[
+                                                              Center(
+                                                                child: FlatButton(
+                                                                  child: Text(
+                                                                      "Ok"
+                                                                  ),
+                                                                  textColor: Colors
+                                                                      .orange,
+                                                                  onPressed: () {
+                                                                    userInputHolder
+                                                                        .clear();
+                                                                    newFileName =
+                                                                    null;
+                                                                    Navigator
+                                                                        .pop(
+                                                                        context);
+                                                                  },
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          );
+                                                        },
+                                                      );
+                                                    });
+                                                  } else {
+                                                    setState(() {
+                                                      showSpinner = true;
+                                                    });
+
+                                                    StorageUploadTask uploadTask = await _fireStorage
+                                                        .ref()
+                                                        .child(
+                                                        fileToUpload.path)
+                                                        .putFile(fileToUpload);
+
+                                                    StorageTaskSnapshot snapshot = await uploadTask
+                                                        .onComplete;
+
+
+                                                    if (snapshot.error == null) {
+                                                      final String downloadUrl = await snapshot.ref.getDownloadURL();
+
+                                                      await _fireStore.collection(
+                                                          'test')
+                                                          .document(owner +
+                                                          newFileName)
+                                                          .setData({
+                                                        "owner": owner,
+                                                        "name": newFileName,
+                                                        "path": fileToUpload.path,
+                                                        "isFolder": false,
+                                                        "url": downloadUrl,
+                                                      });
+
+                                                      setState(() {
+                                                        showSpinner = false;
+                                                        //isLoading = false;
+                                                      });
+
+
+                                                    } else {
+                                                      throw ('Error uploading the file!');
+                                                    }
+
+
+                                                    //BUILD ENCRYPTION ALGORITHM BEFORE STORING.
+
+
+                                                    fileToUpload.deleteSync();
+
                                                     userInputHolder.clear();
                                                     newFileName = null;
                                                     fileToUpload = null;
-                                                    Navigator.pop(context);
-                                                    //NEED THIS SECOND CALL. DON'T REMOVE
-                                                    Navigator.pop(context);
                                                   }
                                                 },
                                               ),
@@ -856,13 +967,10 @@ class _filePage extends State<FilePage> {
                                   },
                                 );
                               },
-                              //padding: EdgeInsets.symmetric(
-                              //horizontal: 72.0
-                              //),
                             ),
                           ),
                         ],);
-                      },
+                    },
                   );
                 },
               ),
@@ -872,10 +980,12 @@ class _filePage extends State<FilePage> {
       ),
     );
   }
+
   deleteData(String ownerEmail, String folderName, [String path]) async {
-    await _fireStore.collection('test').document(ownerEmail+folderName).delete();
-    if(path!=null) {
-      print('deleted from fireStorage');
+    await _fireStore.collection('test')
+        .document(ownerEmail + folderName)
+        .delete();
+    if (path != null) {
       await _fireStorage.ref().child(path).delete();
     }
   }

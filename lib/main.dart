@@ -43,8 +43,6 @@ class MyApp extends StatelessWidget {
           WelcomePage.title: (context) => WelcomePage(),
           FilePage.title: (context) => FilePage(),
           RegistrationScreen.title: (context) => RegistrationScreen(),
-          CreateNew.title: (context) => CreateNew(),
-
 
         }
     );
