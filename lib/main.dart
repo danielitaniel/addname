@@ -10,6 +10,11 @@ import 'package:addname/filehome.dart';
 //import 'package:addname/route_generator.dart';
 
 
+//JULY 2nd 2020
+
+//THIS IS MY LAST GIT COMMIT USING FIREBASE, FROM THIS POINT ONWARDS I AM MOVING TO DOCKER AND USING THE @ PROTOCOL
+
+
 void main() {
   runApp(MyApp());
 }
