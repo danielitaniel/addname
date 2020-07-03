@@ -37,6 +37,9 @@ class DataSearch extends StatefulWidget {
 }
 
 class _dataSearch extends State<DataSearch> {
+  bool _visible = false;
+  var recentFiles = [];
+
   final _authentication = FirebaseAuth.instance;
   FirebaseUser loggedInUser;
   bool showSpinner = false;
@@ -126,21 +129,19 @@ class _dataSearch extends State<DataSearch> {
               ),
             ],
           ),
+          body: buildSuggestions(context),
         ),
       ),
     );
   }
 
-  var fileNames = [];
-  bool _visible = false;
-  var recentFiles = [];
-
   @override
   Widget buildSuggestions(BuildContext context) {
-    var queryLen = query.toString().length;
-    final suggestionList = queryLen > 0
+    var queryLen = query.text.toString().length;
+    print(filenames);
+    final suggestionList = queryLen <= 0
         ? recentFiles
-        : fileNames.where((str) => str.startsWith(query)).toList();
+        : filenames.where((str) => str.startsWith(query.text)).toList();
     if (suggestionList == recentFiles) {
       return ListTile(
         //leading: Icon(Icons.access_time),
@@ -191,12 +192,12 @@ class _dataSearch extends State<DataSearch> {
             leading: Icon(Icons.search),
             title: RichText(
               text: TextSpan(
-                  text: suggestionList[index].substring(0, query.toString().length),
+                  text: suggestionList[index].substring(0, query.text.length),
                   style: TextStyle(
                       color: Colors.black, fontWeight: FontWeight.bold),
                   children: [
                     TextSpan(
-                      text: suggestionList[index].substring(query.toString().length),
+                      text: suggestionList[index].substring(query.text.length),
                       style: TextStyle(color: Colors.grey),
                     ),
                   ]
