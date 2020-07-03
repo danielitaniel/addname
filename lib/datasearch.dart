@@ -8,10 +8,15 @@ import 'dart:ui';
 
 class DataSearch extends SearchDelegate<String> {
   var fileNames = [];
+  bool _visible = false;
   var recentFiles = [];
+
+
   DataSearch(List<dynamic> fileNames){
     this.fileNames = fileNames;
   }
+
+
   static const String title = "data_search_home";
   //final cities = ["Beirut", "Tripoli", "Tyre", "Sidon", "Byblos", "Jounieh"];
   //final recentCities = []; // come back to this
@@ -25,31 +30,39 @@ class DataSearch extends SearchDelegate<String> {
   File fileToUpload;
   var isLoading = false;
 
-  void getCurrentUser() async {
-    try {
-      final user = await _authentication.currentUser();
-      if (user != null) {
-        loggedInUser = user;
-      }
-    } catch (exception) {
-      //TO FIX
-      print(exception);
-    }
-  }
+//  void getCurrentUser() async {
+//    try {
+//      final user = await _authentication.currentUser();
+//      if (user != null) {
+//        loggedInUser = user;
+//      }
+//    } catch (exception) {
+//      //TO FIX
+//      print(exception);
+//    }
+//  }
 
   //var _controller = TextEditingController();
   //String result  = "";
   @override
 
   //ACTIONS FOR APP BAR
-  List<Widget> buildActions(BuildContext context) {
+  List<Widget> buildActions(BuildContext context){
     // TODO: implement buildActions
     return [
-      IconButton(
-          icon: Icon(Icons.clear),
-          onPressed: () {
-            query = "";
-          },
+      Opacity(
+        opacity: _visible? 1.0 : 0.0,
+        child: IconButton(
+            icon: Icon(Icons.clear),
+            onPressed: () async {
+              if(query.length>0) {
+                _visible = !_visible;
+              }
+              if(_visible) {
+                query = "";
+              }
+            },
+        ),
       ),
     ];
   }

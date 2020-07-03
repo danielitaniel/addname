@@ -5,13 +5,14 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:addname/welcome.dart';
-import 'package:addname/datasearch.dart';
+//import 'package:addname/datasearch.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 //import 'package:addname/create.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:addname/searchbar.dart';
 
 class Constants {
   static const String new_file = "Upload New File";
@@ -92,7 +93,10 @@ class _filePage extends State<FilePage> {
                   setState(() {
                     showSpinner = true;
                   });
-                  await showSearch(context: context, delegate: DataSearch(folderAndFileNames));
+                  //await showSearch(context: context, delegate: DataSearch(folderAndFileNames));
+                  Navigator.push(context, MaterialPageRoute(
+                    builder: (context) => DataSearch(folderAndFileNames),
+                  ));
                   setState(() {
                     showSpinner = false;
                   });
@@ -582,7 +586,7 @@ class _filePage extends State<FilePage> {
                                                     },
                                                   );
                                                 });
-                                              };
+                                              }
                                               var owner = loggedInUser.email;
                                               var folderNameExists = false;
                                               var dataStorage = await _fireStore.collection('test').getDocuments();
