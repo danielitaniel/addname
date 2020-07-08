@@ -4,6 +4,7 @@ import 'package:addname/registration.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+//import 'package:github/github.dart';
 
 class WelcomePage extends StatefulWidget {
   //LogInPage({Key key, this.title}) : super(key: key);

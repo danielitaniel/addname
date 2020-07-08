@@ -22,6 +22,42 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.4.1"
+  at_client:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: aeabfe2e233db75e9cbdce63c1a2ce385c1cba4c
+      url: "git@github.com:atsign-company/at_client.git"
+    source: git
+    version: "0.0.1"
+  at_persistence:
+    dependency: transitive
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "48ccd1989bf8a5716538225846c836fd346a4941"
+      url: "git@github.com:atsign-company/at_persistence.git"
+    source: git
+    version: "0.1.0"
+  at_utils:
+    dependency: transitive
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: b35b89341343d1ea23029b69eeaa64dae8e48f21
+      url: "git@github.com:atsign-company/at_utils.git"
+    source: git
+    version: "0.1.0"
+  atlookup:
+    dependency: transitive
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "3e0714b15ee2078fee699f604a04adb1735a666b"
+      url: "git@github.com:atsign-company/atlookup.git"
+    source: git
+    version: "0.3.2"
   boolean_selector:
     dependency: transitive
     description:
@@ -71,6 +107,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.1"
+  cron:
+    dependency: transitive
+    description:
+      name: cron
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.3"
   crypto:
     dependency: transitive
     description:
@@ -160,6 +203,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_keychain:
+    dependency: transitive
+    description:
+      name: flutter_keychain
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0"
   flutter_launcher_name:
     dependency: "direct dev"
     description:
@@ -184,6 +234,20 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  github:
+    dependency: "direct main"
+    description:
+      name: github
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "6.2.2"
+  hive:
+    dependency: transitive
+    description:
+      name: hive
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.4.1+1"
   http:
     dependency: transitive
     description:
@@ -212,6 +276,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.6.2"
+  json_annotation:
+    dependency: transitive
+    description:
+      name: json_annotation
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.1"
   matcher:
     dependency: transitive
     description:
@@ -322,6 +393,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.6"
+  utf7:
+    dependency: transitive
+    description:
+      name: utf7
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.1"
+  uuid:
+    dependency: transitive
+    description:
+      name: uuid
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.2.0"
   vector_math:
     dependency: transitive
     description:
