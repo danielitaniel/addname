@@ -2,6 +2,7 @@ import 'package:addname/filehome.dart';
 import 'package:flutter/material.dart';
 import 'package:addname/welcome.dart';
 import 'package:addname/registration.dart';
+import 'package:addname/atsign_protocol_demo.dart';
 import 'package:addname/create.dart';
 //import 'package:addname/datasearch.dart';
 import 'package:addname/filehome.dart';
@@ -49,6 +50,7 @@ class MyApp extends StatelessWidget {
           WelcomePage.title: (context) => WelcomePage(),
           FilePage.title: (context) => FilePage(),
           RegistrationScreen.title: (context) => RegistrationScreen(),
+          AtLookupWidget.title: (context) => AtLookupWidget(),
 
         }
     );

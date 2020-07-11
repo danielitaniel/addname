@@ -37,17 +37,20 @@ dependencies:
   firebase_storage: ^3.1.6
   file_picker: ^1.12.0
   github: ^6.0.0
+  path_provider: ^1.6.11
+
+  #To encrypt/decrypt data
+  encrypt: ^4.0.2
+  aes_crypt: ^0.1.1
+
 
 
   #GitHub Dependencies using @ protocol
 
   at_client:
     git: git@github.com:atsign-company/at_client.git
-    #git:
-      #url: git@github.com/atsign-company/at_client.git
-      #path: /Users/danyitani/Desktop/atcompany/at_client
-      #ref: master
-
+  atsign_protocol_demo:
+    git: git@github.com:atsign-company/atsign_protocol_demo.git
 
 dev_dependencies:
   flutter_launcher_name: "^0.0.1"

@@ -2,6 +2,7 @@
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:encrypt/encrypt.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:addname/welcome.dart';
@@ -13,6 +14,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:addname/searchbar.dart';
+import 'package:at_client/at_client.dart';
+import 'package:encrypt/encrypt.dart' as encrypt;
+import 'dart:typed_data';
+import 'package:aes_crypt/aes_crypt.dart';
+import 'package:path_provider/path_provider.dart';
+
 class Constants {
   static const String new_file = "Upload New File";
   static const String new_folder = "Create a New Folder";
@@ -53,6 +60,8 @@ class _filePage extends State<FilePage> {
   String newFileName;
   File fileToUpload;
   var folderAndFileNames = [];
+  List<Widget> _homeScreenWidgets = [];
+  File _newEncFile;
 
   void initState() {
     super.initState();
@@ -83,8 +92,57 @@ class _filePage extends State<FilePage> {
         inAsyncCall: showSpinner,
         child: Scaffold(
           appBar: AppBar(
-              leading: Icon(
-                Icons.list,
+              leading: IconButton(
+                icon: Icon(
+                  Icons.list,
+                ),
+                onPressed: () {
+                  return showDialog(
+                    context: context,
+                    barrierDismissible: true,
+                    builder: (BuildContext context) {
+                      return CupertinoAlertDialog(
+                        actions: <Widget>[
+                          CupertinoDialogAction(
+                            textStyle: TextStyle(
+                              fontSize: 25.0,
+                              color: Colors.orange,
+                            ),
+                            child: Center(
+                              child: Text(
+                                "View Files",
+                                style: TextStyle(
+                                  fontSize: 45.0
+                                ),
+                              ),
+                            ),
+                            onPressed: () {
+
+                            },
+                          ),
+                          CupertinoDialogAction(
+                            textStyle: TextStyle(
+                              fontSize: 25.0,
+                              color:  Colors.orange,
+                            ),
+                            child: Center(
+                              child: Text(
+                                "View Folders",
+                                style: TextStyle(
+                                    fontSize: 45.0
+                                ),
+                              ),
+                            ),
+                            onPressed: () {
+
+                            },
+                          ),
+                        ],
+
+                      );
+                    },
+                  );
+                },
               ),
               actions: [IconButton(
                 icon: Icon(Icons.search),
@@ -128,9 +186,8 @@ class _filePage extends State<FilePage> {
                     stream: _fireStore.collection('test').snapshots(),
                     builder: (context, snapshot) {
                       //add loading screen here
-                      List<Widget> homeScreenWidgets = [];
                       if (snapshot.hasData) {
-                        homeScreenWidgets.add(
+                        _homeScreenWidgets.add(
                           SizedBox(
                             height: 15.0,
                           ),
@@ -180,7 +237,16 @@ class _filePage extends State<FilePage> {
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                           onPressed: () async {
-//                                            String cloudBucket = await _fireStorage.ref().child(filePath).getBucket();
+                                            if(isFolder) {
+
+                                            } else {
+                                              StorageUploadTask uploadTask = await _fireStorage
+                                                  .ref()
+                                                  .child(
+                                                  _newEncFile.path).getDownloadURL();
+                                              
+                                            }
+
                                           },
                                         ),
                                       ),
@@ -290,7 +356,7 @@ class _filePage extends State<FilePage> {
                                 ),
                               ],
                             );
-                            homeScreenWidgets.add(folderWidget);
+                            _homeScreenWidgets.add(folderWidget);
                           } else {
                             final fileWidget = Stack(
                               children: <Widget>[
@@ -441,9 +507,9 @@ class _filePage extends State<FilePage> {
                                 ),
                               ],
                             );
-                            homeScreenWidgets.add(fileWidget);
+                            _homeScreenWidgets.add(fileWidget);
                           }
-                          homeScreenWidgets.add(
+                          _homeScreenWidgets.add(
                             SizedBox(
                               height: 20.0,
                             ),
@@ -468,7 +534,7 @@ class _filePage extends State<FilePage> {
                         return Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children:
-                          homeScreenWidgets,
+                          _homeScreenWidgets,
                         );
                       }
                     },
@@ -713,6 +779,20 @@ class _filePage extends State<FilePage> {
                                                   fileToUpload =
                                                   await FilePicker.getFile(
                                                       type: FileType.any);
+
+                                                  //FIRST CRYPT PACKAGE
+//                                                  var key = encrypt.Key.fromUtf8("test key");
+//                                                  final iv = encrypt.IV.fromLength(16); // initialization vector
+//                                                  final encrypter = Encrypter(AES(key));
+                                                  //var fileEncrypt = encrypter.en
+
+                                                  //SECOND CRYPT PACKAGE
+                                                  var crypt = AesCrypt();
+                                                  crypt.setOverwriteMode(AesCryptOwMode.warn);
+
+                                                  //CHANGE PASSWORD TO BE BETTER
+                                                  crypt.setPassword('my cool password');
+                                                  //create new encrypted file
                                                   if (fileToUpload == null) {
                                                     setState(() {
                                                       return showDialog(
@@ -754,9 +834,32 @@ class _filePage extends State<FilePage> {
                                                       );
                                                     });
                                                   } else {
+                                                    print("HERE");
                                                     var longStringame = fileToUpload.toString();
+                                                    print(longStringame);
                                                     newFileName = longStringame.substring(longStringame.lastIndexOf("/" ) +1, longStringame.length-1);
-                                                    userInputHolder.text = newFileName;
+                                                    Directory tempDir = await getTemporaryDirectory();
+                                                    _newEncFile = await new File("${tempDir.path}/"+loggedInUser.email+newFileName+'.aes').create(recursive: true);
+                                                    print("FILE CREATED");
+                                                    try {
+                                                      print("HERE");
+                                                      // Encrypts user file and save encrypted file to a file with
+                                                      // '.aes' extension added.
+                                                      //allows for over-write. make sure I really want this
+                                                      crypt.setOverwriteMode(AesCryptOwMode.rename);
+                                                      String encryptedFile = crypt.encryptFileSync(fileToUpload.path, _newEncFile.path);
+                                                      print("GOOD");
+                                                      print('The encryption has been completed successfully.');
+                                                      print('Encrypted file: $encryptedFile');
+                                                    } on AesCryptException catch (e) {
+                                                      // It goes here if overwrite mode set as 'AesCryptFnMode.warn'
+                                                      // and encrypted file already exists.
+                                                      if (e.type == AesCryptExceptionType.destFileExists) {
+                                                        print('The file encryption has been completed unsuccessfully.');
+                                                        print(e.message);
+                                                      }
+                                                      userInputHolder.text = newFileName;
+                                                    }
                                                   }
                                                 },
                                               ),
@@ -862,6 +965,7 @@ class _filePage extends State<FilePage> {
                                                       .getDocuments();
 
                                                   //THIS IS NOT EFFICIENT. NEED TO RE-WRITE
+                                                  //CHANGE LIST TO A DICTIONARY/HASH SET
                                                   for (var fileName in fileNames
                                                       .documents) {
                                                     if (fileName.documentID ==
@@ -914,41 +1018,44 @@ class _filePage extends State<FilePage> {
                                                     setState(() {
                                                       showSpinner = true;
                                                     });
+                                                    try {
+                                                      StorageUploadTask uploadTask = await _fireStorage
+                                                          .ref()
+                                                          .child(
+                                                          _newEncFile.path)
+                                                          .putFile(_newEncFile);
 
-                                                    StorageUploadTask uploadTask = await _fireStorage
-                                                        .ref()
-                                                        .child(
-                                                        fileToUpload.path)
-                                                        .putFile(fileToUpload);
+                                                      StorageTaskSnapshot snapshot = await uploadTask
+                                                          .onComplete;
 
-                                                    StorageTaskSnapshot snapshot = await uploadTask
-                                                        .onComplete;
+                                                      if (snapshot.error == null) {
+                                                      final String downloadUrl = await snapshot
+                                                          .ref
+                                                          .getDownloadURL();
 
-
-                                                    if (snapshot.error == null) {
-                                                      final String downloadUrl = await snapshot.ref.getDownloadURL();
-
-                                                      await _fireStore.collection(
-                                                          'test')
-                                                          .document(owner +
-                                                          newFileName)
-                                                          .setData({
-                                                        "owner": owner,
-                                                        "name": newFileName,
-                                                        "path": fileToUpload.path,
-                                                        "isFolder": false,
-                                                        "url": downloadUrl,
-                                                      });
+                                                      await _fireStore
+                                                          .collection(
+                                                            'test')
+                                                              .document(owner +
+                                                                  newFileName)
+                                                                    .setData({
+                                                                      "owner": owner,
+                                                                      "name": newFileName,
+                                                                      "path": fileToUpload
+                                                                            .path,
+                                                                              "isFolder": false,
+                                                                              "url": downloadUrl,
+                                                                              });
+                                                      }
+                                                    } catch (e) {
+                                                      print(e);
+                                                    }
 
                                                       setState(() {
                                                         showSpinner = false;
                                                         //isLoading = false;
                                                       });
 
-
-                                                    } else {
-                                                      throw ('Error uploading the file!');
-                                                    }
 
 
                                                     //BUILD ENCRYPTION ALGORITHM BEFORE STORING.
@@ -984,12 +1091,14 @@ class _filePage extends State<FilePage> {
     );
   }
 
-  deleteData(String ownerEmail, String folderName, [String path]) async {
+
+  deleteData(String ownerEmail, String folderFileName, [String path]) async {
     await _fireStore.collection('test')
-        .document(ownerEmail + folderName)
+        .document(ownerEmail + folderFileName)
         .delete();
     if (path != null) {
       await _fireStorage.ref().child(path).delete();
+      folderAndFileNames.remove(folderFileName);
     }
   }
 }

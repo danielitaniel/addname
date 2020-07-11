@@ -4,6 +4,9 @@ import 'package:addname/registration.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:at_client/at_client.dart';
+import 'package:addname/atsign_protocol_demo.dart';
+import 'package:atsign_protocol_demo/atUtils/at_config.dart' as at_config;
 //import 'package:github/github.dart';
 
 class WelcomePage extends StatefulWidget {
@@ -79,8 +82,11 @@ String password;
           try {
             final user = await _auth.signInWithEmailAndPassword(
                 email: email, password: password);
+            final usr = await AtClient().storeCredentialToKeychain('@kevin', at_config.secretMap['@kevin']);
+            print(usr);
             if (user != null) {
               Navigator.pushNamed(context, FilePage.title);
+              //Navigator.pushNamed(context, AtLookupWidget.title);
             }
             setState(() {
               showSpinner = false;
