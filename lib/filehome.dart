@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:addname/welcome.dart';
 //import 'package:addname/datasearch.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 //import 'package:addname/create.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -19,6 +20,7 @@ import 'package:encrypt/encrypt.dart' as encrypt;
 import 'dart:typed_data';
 import 'package:aes_crypt/aes_crypt.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:hive/hive.dart';
 
 class Constants {
   static const String new_file = "Upload New File";
@@ -62,6 +64,10 @@ class _filePage extends State<FilePage> {
   var folderAndFileNames = [];
   List<Widget> _homeScreenWidgets = [];
   File _newEncFile;
+  String uriPath; //Path to download URL from Firebase
+  File _cachedFile;
+
+  Future<File> get file => null;
 
   void initState() {
     super.initState();
@@ -194,320 +200,325 @@ class _filePage extends State<FilePage> {
                         );
                         final files = snapshot.data.documents;
                         for (var file in files) {
-                          final dataName = file.data["name"];
-                          final filePath = file.data["path"];
-                          final isFolder = file.data["isFolder"];
-                          if(!folderAndFileNames.contains(dataName)) {
-                            folderAndFileNames.add(dataName);
-                          }
-                          if (isFolder) {
-                            final folderWidget = Stack(
-                              children: <Widget>[
-                                Row(
-                                  //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                  children: <Widget>[
-                                    SizedBox(
-                                      width: 30.0,
-                                    ),
-                                    Flexible(
-                                      fit: FlexFit.tight,
-                                      flex: 1,
-                                      child: Container(
-                                        child: Icon(
-                                          Icons.folder,
-                                          color: Colors.orange,
+                          try {
+                            final dataName = file.data["name"];
+                            final filePath = file.data["path"];
+                            final isFolder = file.data["isFolder"];
+
+                            if (!folderAndFileNames.contains(dataName)) {
+                              folderAndFileNames.add(dataName);
+                            }
+                            if (isFolder) {
+                              final folderWidget = Stack(
+                                children: <Widget>[
+                                  Row(
+                                    //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: <Widget>[
+                                      SizedBox(
+                                        width: 30.0,
+                                      ),
+                                      Flexible(
+                                        fit: FlexFit.tight,
+                                        flex: 1,
+                                        child: Container(
+                                          child: Icon(
+                                            Icons.folder,
+                                            color: Colors.orange,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    SizedBox(
-                                      width: 20.0,
-                                    ),
-                                    Flexible(
-                                      fit: FlexFit.tight,
-                                      flex: 5,
-                                      child: Container(
-                                        child: FlatButton(
-                                          child: Text(
-                                            '$dataName',
-                                            style: TextStyle(
-                                              fontSize: 15.0,
+                                      SizedBox(
+                                        width: 20.0,
+                                      ),
+                                      Flexible(
+                                        fit: FlexFit.tight,
+                                        flex: 5,
+                                        child: Container(
+                                          child: FlatButton(
+                                            child: Text(
+                                              '$dataName',
+                                              style: TextStyle(
+                                                fontSize: 15.0,
+                                              ),
+                                              textAlign: TextAlign.justify,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
                                             ),
-                                            textAlign: TextAlign.justify,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          onPressed: () async {
-                                            if(isFolder) {
+                                            onPressed: () async {
 
-                                            } else {
-                                              StorageUploadTask uploadTask = await _fireStorage
-                                                  .ref()
-                                                  .child(
-                                                  _newEncFile.path).getDownloadURL();
-                                              
-                                            }
-
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 20.0,
-                                    ),
-                                    Flexible(
-                                      fit: FlexFit.tight,
-                                      flex: 1,
-                                      child: Container(
-                                        child: IconButton(
-                                          icon: Icon(
-                                            Icons.send,
-                                            color: Colors.orange,
+                                            },
                                           ),
-                                          onPressed: () {
-
-                                          },
                                         ),
                                       ),
-                                    ),
-                                    SizedBox(
-                                      width: 5.0,
-                                    ),
-                                    Flexible(
-                                      fit: FlexFit.tight,
-                                      flex: 1,
-                                      child: Container(
-                                        child: IconButton(
-                                          icon: Icon(
-                                            Icons.delete,
-                                            color: Colors.orange,
-                                          ),
-                                          onPressed: () {
-                                            return showDialog(
-                                                context: context,
-                                                barrierDismissible: true,
-                                                builder: (
-                                                    BuildContext context) {
-                                                  return AlertDialog(
-                                                    title: RichText(
-                                                      text: TextSpan(
-                                                        children: [
-                                                          TextSpan(
-                                                            text: "Are you sure you want to delete the folder ",
-                                                            style: TextStyle(
-                                                              fontSize: 20.0,
-                                                              color: Colors
-                                                                  .black,
-                                                            ),
-                                                          ),
-                                                          TextSpan(
-                                                            text: dataName,
-                                                            style: TextStyle(
-                                                              fontSize: 20.0,
-                                                              color: Colors
-                                                                  .black,
-                                                              fontStyle: FontStyle
-                                                                  .italic,
-                                                              fontWeight: FontWeight
-                                                                  .bold,
-                                                            ),
-                                                          ),
-                                                          TextSpan(
-                                                            text: "?",
-                                                            style: TextStyle(
-                                                              fontSize: 20.0,
-                                                              color: Colors
-                                                                  .black,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    actions: <Widget>[
-                                                      FlatButton(
-                                                        child: Text("No"),
-                                                        onPressed: () {
-                                                          Navigator.pop(
-                                                              context);
-                                                        },
-                                                      ),
-                                                      FlatButton(
-                                                        child: Text("Yes"),
-                                                        onPressed: () {
-                                                          deleteData(
-                                                              loggedInUser
-                                                                  .email,
-                                                              '$dataName');
-                                                          Navigator.pop(
-                                                              context);
-                                                        },
-                                                      ),
-                                                    ],
-                                                  );
-                                                }
-                                            );
-                                          },
-                                        ),
+                                      SizedBox(
+                                        width: 20.0,
                                       ),
-                                    ),
-                                    SizedBox(
-                                      width: 15.0,
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            );
-                            _homeScreenWidgets.add(folderWidget);
-                          } else {
-                            final fileWidget = Stack(
-                              children: <Widget>[
-                                Row(
-                                  //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                  children: <Widget>[
-                                    SizedBox(
-                                      width: 30.0,
-                                    ),
-                                    Flexible(
-                                      fit: FlexFit.tight,
-                                      flex: 1,
-                                      child: Container(
-                                        child: Icon(
-                                          Icons.chrome_reader_mode,
-                                          color: Colors.orange,
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 20.0,
-                                    ),
-                                    Flexible(
-                                      fit: FlexFit.tight,
-                                      flex: 5,
-                                      child: Container(
-                                        child: FlatButton(
-                                          child: Text(
-                                            '$dataName',
-                                            style: TextStyle(
-                                              fontSize: 15.0,
+                                      Flexible(
+                                        fit: FlexFit.tight,
+                                        flex: 1,
+                                        child: Container(
+                                          child: IconButton(
+                                            icon: Icon(
+                                              Icons.send,
+                                              color: Colors.orange,
                                             ),
-                                            textAlign: TextAlign.justify,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          onPressed: () async {
-//                                            List cloudBucket = await _fireStorage
-//                                                .ref().child(filePath).getData(
-//                                                1);
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      width: 20.0,
-                                    ),
-                                    Flexible(
-                                      fit: FlexFit.tight,
-                                      flex: 1,
-                                      child: Container(
-                                        child: IconButton(
-                                          icon: Icon(
-                                            Icons.send,
-                                            color: Colors.orange,
-                                          ),
-                                          onPressed: () {
+                                            onPressed: () {
 
-                                          },
+                                            },
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    SizedBox(
-                                      width: 5.0,
-                                    ),
-                                    Flexible(
-                                      fit: FlexFit.tight,
-                                      flex: 1,
-                                      child: Container(
-                                        child: IconButton(
-                                          icon: Icon(
-                                            Icons.delete,
+                                      SizedBox(
+                                        width: 5.0,
+                                      ),
+                                      Flexible(
+                                        fit: FlexFit.tight,
+                                        flex: 1,
+                                        child: Container(
+                                          child: IconButton(
+                                            icon: Icon(
+                                              Icons.delete,
+                                              color: Colors.orange,
+                                            ),
+                                            onPressed: () {
+                                              return showDialog(
+                                                  context: context,
+                                                  barrierDismissible: true,
+                                                  builder: (
+                                                      BuildContext context) {
+                                                    return AlertDialog(
+                                                      title: RichText(
+                                                        text: TextSpan(
+                                                          children: [
+                                                            TextSpan(
+                                                              text: "Are you sure you want to delete the folder ",
+                                                              style: TextStyle(
+                                                                fontSize: 20.0,
+                                                                color: Colors
+                                                                    .black,
+                                                              ),
+                                                            ),
+                                                            TextSpan(
+                                                              text: dataName,
+                                                              style: TextStyle(
+                                                                fontSize: 20.0,
+                                                                color: Colors
+                                                                    .black,
+                                                                fontStyle: FontStyle
+                                                                    .italic,
+                                                                fontWeight: FontWeight
+                                                                    .bold,
+                                                              ),
+                                                            ),
+                                                            TextSpan(
+                                                              text: "?",
+                                                              style: TextStyle(
+                                                                fontSize: 20.0,
+                                                                color: Colors
+                                                                    .black,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      actions: <Widget>[
+                                                        FlatButton(
+                                                          child: Text("No"),
+                                                          onPressed: () {
+                                                            Navigator.pop(
+                                                                context);
+                                                          },
+                                                        ),
+                                                        FlatButton(
+                                                          child: Text("Yes"),
+                                                          onPressed: () {
+                                                            deleteData(
+                                                                loggedInUser
+                                                                    .email,
+                                                                '$dataName');
+                                                            Navigator.pop(
+                                                                context);
+                                                          },
+                                                        ),
+                                                      ],
+                                                    );
+                                                  }
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 15.0,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              );
+                              _homeScreenWidgets.add(folderWidget);
+                            } else {
+                              final fileWidget = Stack(
+                                children: <Widget>[
+                                  Row(
+                                    //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: <Widget>[
+                                      SizedBox(
+                                        width: 30.0,
+                                      ),
+                                      Flexible(
+                                        fit: FlexFit.tight,
+                                        flex: 1,
+                                        child: Container(
+                                          child: Icon(
+                                            Icons.chrome_reader_mode,
                                             color: Colors.orange,
                                           ),
-                                          onPressed: () {
-                                            return showDialog(
-                                                context: context,
-                                                barrierDismissible: true,
-                                                builder: (
-                                                    BuildContext context) {
-                                                  return AlertDialog(
-                                                    title: RichText(
-                                                      text: TextSpan(
-                                                        children: [
-                                                          TextSpan(
-                                                            text: "Are you sure you want to delete the file ",
-                                                            style: TextStyle(
-                                                              fontSize: 20.0,
-                                                              color: Colors
-                                                                  .black,
-                                                            ),
-                                                          ),
-                                                          TextSpan(
-                                                            text: dataName,
-                                                            style: TextStyle(
-                                                              fontSize: 20.0,
-                                                              color: Colors
-                                                                  .black,
-                                                              fontStyle: FontStyle
-                                                                  .italic,
-                                                              fontWeight: FontWeight
-                                                                  .bold,
-                                                            ),
-                                                          ),
-                                                          TextSpan(
-                                                            text: "?",
-                                                            style: TextStyle(
-                                                              fontSize: 20.0,
-                                                              color: Colors
-                                                                  .black,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    actions: <Widget>[
-                                                      FlatButton(
-                                                        child: Text("No"),
-                                                        onPressed: () {
-                                                          Navigator.pop(
-                                                              context);
-                                                        },
-                                                      ),
-                                                      FlatButton(
-                                                        child: Text("Yes"),
-                                                        onPressed: () {
-                                                          deleteData(
-                                                              loggedInUser
-                                                                  .email,
-                                                              '$dataName',
-                                                              filePath);
-                                                          Navigator.pop(
-                                                              context);
-                                                        },
-                                                      ),
-                                                    ],
-                                                  );
-                                                }
-                                            );
-                                          },
                                         ),
                                       ),
-                                    ),
-                                    SizedBox(
-                                      width: 15.0,
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            );
-                            _homeScreenWidgets.add(fileWidget);
+                                      SizedBox(
+                                        width: 20.0,
+                                      ),
+                                      Flexible(
+                                        fit: FlexFit.tight,
+                                        flex: 5,
+                                        child: Container(
+                                          child: FlatButton(
+                                            child: Text(
+                                              '$dataName',
+                                              style: TextStyle(
+                                                fontSize: 15.0,
+                                              ),
+                                              textAlign: TextAlign.justify,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            onPressed: () async {
+                                              print("WE WANT TO DOWNLOAD: $filePath");
+                                              await downloadFile(filePath);
+                                              return Container(
+                                                color: Colors.black,
+                                                width: 150.0,
+                                                height: 150.0,
+                                                child: _cachedFile != null
+                                                    ? Image.asset(
+                                                    _cachedFile.path)
+                                                    : Container(),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 20.0,
+                                      ),
+                                      Flexible(
+                                        fit: FlexFit.tight,
+                                        flex: 1,
+                                        child: Container(
+                                          child: IconButton(
+                                            icon: Icon(
+                                              Icons.send,
+                                              color: Colors.orange,
+                                            ),
+                                            onPressed: () {
+
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 5.0,
+                                      ),
+                                      Flexible(
+                                        fit: FlexFit.tight,
+                                        flex: 1,
+                                        child: Container(
+                                          child: IconButton(
+                                            icon: Icon(
+                                              Icons.delete,
+                                              color: Colors.orange,
+                                            ),
+                                            onPressed: () {
+                                              return showDialog(
+                                                  context: context,
+                                                  barrierDismissible: true,
+                                                  builder: (
+                                                      BuildContext context) {
+                                                    return AlertDialog(
+                                                      title: RichText(
+                                                        text: TextSpan(
+                                                          children: [
+                                                            TextSpan(
+                                                              text: "Are you sure you want to delete the file ",
+                                                              style: TextStyle(
+                                                                fontSize: 20.0,
+                                                                color: Colors
+                                                                    .black,
+                                                              ),
+                                                            ),
+                                                            TextSpan(
+                                                              text: dataName,
+                                                              style: TextStyle(
+                                                                fontSize: 20.0,
+                                                                color: Colors
+                                                                    .black,
+                                                                fontStyle: FontStyle
+                                                                    .italic,
+                                                                fontWeight: FontWeight
+                                                                    .bold,
+                                                              ),
+                                                            ),
+                                                            TextSpan(
+                                                              text: "?",
+                                                              style: TextStyle(
+                                                                fontSize: 20.0,
+                                                                color: Colors
+                                                                    .black,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      actions: <Widget>[
+                                                        FlatButton(
+                                                          child: Text("No"),
+                                                          onPressed: () {
+                                                            Navigator.pop(
+                                                                context);
+                                                          },
+                                                        ),
+                                                        FlatButton(
+                                                          child: Text("Yes"),
+                                                          onPressed: () {
+                                                            deleteData(
+                                                                loggedInUser
+                                                                    .email,
+                                                                '$dataName',
+                                                                filePath);
+                                                            Navigator.pop(
+                                                                context);
+                                                          },
+                                                        ),
+                                                      ],
+                                                    );
+                                                  }
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 15.0,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              );
+                              _homeScreenWidgets.add(fileWidget);
+                            }
+                          } catch (e) {
+                            print("error");
+                            print(e);
                           }
                           _homeScreenWidgets.add(
                             SizedBox(
@@ -787,12 +798,6 @@ class _filePage extends State<FilePage> {
                                                   //var fileEncrypt = encrypter.en
 
                                                   //SECOND CRYPT PACKAGE
-                                                  var crypt = AesCrypt();
-                                                  crypt.setOverwriteMode(AesCryptOwMode.warn);
-
-                                                  //CHANGE PASSWORD TO BE BETTER
-                                                  crypt.setPassword('my cool password');
-                                                  //create new encrypted file
                                                   if (fileToUpload == null) {
                                                     setState(() {
                                                       return showDialog(
@@ -834,32 +839,10 @@ class _filePage extends State<FilePage> {
                                                       );
                                                     });
                                                   } else {
-                                                    print("HERE");
                                                     var longStringame = fileToUpload.toString();
                                                     print(longStringame);
                                                     newFileName = longStringame.substring(longStringame.lastIndexOf("/" ) +1, longStringame.length-1);
-                                                    Directory tempDir = await getTemporaryDirectory();
-                                                    _newEncFile = await new File("${tempDir.path}/"+loggedInUser.email+newFileName+'.aes').create(recursive: true);
-                                                    print("FILE CREATED");
-                                                    try {
-                                                      print("HERE");
-                                                      // Encrypts user file and save encrypted file to a file with
-                                                      // '.aes' extension added.
-                                                      //allows for over-write. make sure I really want this
-                                                      crypt.setOverwriteMode(AesCryptOwMode.rename);
-                                                      String encryptedFile = crypt.encryptFileSync(fileToUpload.path, _newEncFile.path);
-                                                      print("GOOD");
-                                                      print('The encryption has been completed successfully.');
-                                                      print('Encrypted file: $encryptedFile');
-                                                    } on AesCryptException catch (e) {
-                                                      // It goes here if overwrite mode set as 'AesCryptFnMode.warn'
-                                                      // and encrypted file already exists.
-                                                      if (e.type == AesCryptExceptionType.destFileExists) {
-                                                        print('The file encryption has been completed unsuccessfully.');
-                                                        print(e.message);
-                                                      }
-                                                      userInputHolder.text = newFileName;
-                                                    }
+                                                    userInputHolder.text = newFileName;
                                                   }
                                                 },
                                               ),
@@ -894,7 +877,7 @@ class _filePage extends State<FilePage> {
                                                                   ),
                                                                   textColor: Colors
                                                                       .orange,
-                                                                  onPressed: () {
+                                                                  onPressed: () async {
                                                                     userInputHolder
                                                                         .clear();
                                                                     newFileName =
@@ -911,6 +894,9 @@ class _filePage extends State<FilePage> {
                                                       );
                                                     });
                                                   }
+                                                  setState(() {
+                                                    showSpinner = true;
+                                                  });
                                                   Navigator.pop(context);
                                                   //NEED THIS SECOND CALL. DON'T REMOVE
                                                   Navigator.pop(context);
@@ -1015,57 +1001,49 @@ class _filePage extends State<FilePage> {
                                                       );
                                                     });
                                                   } else {
-                                                    setState(() {
-                                                      showSpinner = true;
-                                                    });
+                                                    var crypt = AesCrypt();
+                                                    String encryptedFilePath;
+                                                    crypt.setOverwriteMode(AesCryptOwMode.warn);
+
+                                                    //CHANGE PASSWORD TO BE BETTER
+                                                    crypt.setPassword('my cool password');
+                                                    //create new encrypted file
+                                                    Directory tempDir = await getTemporaryDirectory();
+                                                    _newEncFile = await new File("${tempDir.path}/"+loggedInUser.email+newFileName+'.aes').create(recursive: true);
                                                     try {
-                                                      StorageUploadTask uploadTask = await _fireStorage
-                                                          .ref()
-                                                          .child(
-                                                          _newEncFile.path)
-                                                          .putFile(_newEncFile);
-
-                                                      StorageTaskSnapshot snapshot = await uploadTask
-                                                          .onComplete;
-
-                                                      if (snapshot.error == null) {
-                                                      final String downloadUrl = await snapshot
-                                                          .ref
-                                                          .getDownloadURL();
-
-                                                      await _fireStore
-                                                          .collection(
-                                                            'test')
-                                                              .document(owner +
-                                                                  newFileName)
-                                                                    .setData({
-                                                                      "owner": owner,
-                                                                      "name": newFileName,
-                                                                      "path": fileToUpload
-                                                                            .path,
-                                                                              "isFolder": false,
-                                                                              "url": downloadUrl,
-                                                                              });
+                                                      // Encrypts user file and save encrypted file to a file with
+                                                      // '.aes' extension added.
+                                                      //allows for over-write. make sure I really want this
+                                                      crypt.setOverwriteMode(AesCryptOwMode.rename);
+                                                      encryptedFilePath = crypt.encryptFileSync(fileToUpload.path);
+                                                      print("ENCRYPTEDFILE: $encryptedFilePath");
+                                                    } on AesCryptException catch (e) {
+                                                      // It goes here if overwrite mode set as 'AesCryptFnMode.warn'
+                                                      // and encrypted file already exists.
+                                                      if (e.type == AesCryptExceptionType.destFileExists) {
+                                                        print('The file encryption has been completed unsuccessfully.');
+                                                        print(e.message);
                                                       }
-                                                    } catch (e) {
+                                                    }
+                                                    try {
+                                                      final RegExp regExp = RegExp('[^?/]*\.(aes)');
+                                                      final String encryptedFileName = regExp.stringMatch(encryptedFilePath);
+                                                      print("ENCRYPTED FILE NAME: $encryptedFileName");
+                                                      uploadFile(encryptedFilePath, "encrypted"+encryptedFileName);
+                                                      print("SUCCESS!!!");
+                                                    } catch(e) {
                                                       print(e);
                                                     }
 
-                                                      setState(() {
-                                                        showSpinner = false;
-                                                        //isLoading = false;
-                                                      });
 
-
-
-                                                    //BUILD ENCRYPTION ALGORITHM BEFORE STORING.
-
-
-                                                    fileToUpload.deleteSync();
+                                                    //fileToUpload.deleteSync();
 
                                                     userInputHolder.clear();
                                                     newFileName = null;
                                                     fileToUpload = null;
+                                                    setState(() {
+                                                      showSpinner = false;
+                                                    });
                                                   }
                                                 },
                                               ),
@@ -1092,9 +1070,90 @@ class _filePage extends State<FilePage> {
   }
 
 
-  deleteData(String ownerEmail, String folderFileName, [String path]) async {
+  Future<Null> uploadFile(String filepath, String fileName) async {
+    try {
+      final ByteData bytes = await rootBundle.load(filepath);
+      final Directory tempDir = Directory.systemTemp;
+      final file = File("${tempDir.path}/$fileName");
+      file.writeAsBytes(bytes.buffer.asInt8List(),
+          mode: FileMode.write); //FIX ME, WRITE? OR READ?
+      final StorageReference ref = FirebaseStorage.instance.ref().child(filepath);
+      print("upload file path is: $filepath");
+      final StorageUploadTask task = ref.putFile(file);
+      final Uri downloadUrl = (await task.onComplete).uploadSessionUri; // make sure this is correct
+      uriPath = downloadUrl.toString();
+      await _fireStore
+          .collection(
+          'test')
+          .document(loggedInUser.email +
+          "encrypted"+fileName)
+          .setData({
+        "owner": loggedInUser.email,
+        "name": fileName,
+        "path": file.path,
+        "isFolder": false,
+        "url": uriPath,
+      });
+      print("ALL G");
+      tempDir.deleteSync(recursive: true);
+
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<Null> downloadFile(String httpPath) async {
+
+    var crypt = AesCrypt();
+    String decFilepath;
+    crypt.setPassword('my cool password');
+
+
+    print("httpPath $httpPath");
+    final RegExp regExp = RegExp('[^?/]*\.(aes)');
+    final String fileName = regExp.stringMatch(httpPath);
+    print(fileName);
+    final Directory tempDir = Directory.systemTemp;
+    final encFile = await File("${tempDir.path}/todecrypt$fileName").create(recursive: true);
+
+    print(await encFile.length());
+
+    final StorageReference ref = FirebaseStorage.instance.ref().child(httpPath);
+    print("ref is good.");
+    print(ref.path);
+    final StorageFileDownloadTask downloadTask = ref.writeToFile(encFile);
+
+    //wait for upload task to finish
+    final int byteNumber = (await downloadTask.future).totalByteCount;
+
+    print("byte number is $byteNumber" );
+    final file = await File('${tempDir.path}/decryptedfile').create(recursive: true);
+    print("good till here");
+
+    decFilepath = crypt.decryptFileSync(encFile.path);
+
+    print("decrypted?");
+
+    final ByteData bytes = await rootBundle.load(decFilepath);
+    file.writeAsBytes(bytes.buffer.asInt8List(),
+        mode: FileMode.write); //FIX ME, WRITE? OR READ?
+
+
+
+    setState(() {
+      _cachedFile = file;
+    });
+
+  }
+
+
+
+  Future<Null> deleteData(String ownerEmail, String folderFileName, [String path]) async {
     await _fireStore.collection('test')
         .document(ownerEmail + folderFileName)
+        .delete();
+    await _fireStore.collection('test')
+        .document(ownerEmail + "encrypted" + folderFileName)
         .delete();
     if (path != null) {
       await _fireStorage.ref().child(path).delete();

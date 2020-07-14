@@ -286,7 +286,7 @@ packages:
     source: hosted
     version: "6.2.2"
   hive:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: hive
       url: "https://pub.dartlang.org"
