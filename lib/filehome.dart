@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:encrypt/encrypt.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:addname/welcome.dart';
@@ -21,6 +22,8 @@ import 'dart:typed_data';
 import 'package:aes_crypt/aes_crypt.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:build_runner/build_runner.dart';
 
 class Constants {
   static const String new_file = "Upload New File";
@@ -395,15 +398,6 @@ class _filePage extends State<FilePage> {
                                             onPressed: () async {
                                               print("WE WANT TO DOWNLOAD: $filePath");
                                               await downloadFile(filePath);
-                                              return Container(
-                                                color: Colors.black,
-                                                width: 150.0,
-                                                height: 150.0,
-                                                child: _cachedFile != null
-                                                    ? Image.asset(
-                                                    _cachedFile.path)
-                                                    : Container(),
-                                              );
                                             },
                                           ),
                                         ),
@@ -1086,7 +1080,7 @@ class _filePage extends State<FilePage> {
           .collection(
           'test')
           .document(loggedInUser.email +
-          "encrypted"+fileName)
+          fileName)
           .setData({
         "owner": loggedInUser.email,
         "name": fileName,
@@ -1117,41 +1111,66 @@ class _filePage extends State<FilePage> {
     final encFile = await File("${tempDir.path}/todecrypt$fileName").create(recursive: true);
 
     print(await encFile.length());
+    final dbReference =  FirebaseDatabase.instance.reference().child("test");
+    print(await dbReference.once());
 
-    final StorageReference ref = FirebaseStorage.instance.ref().child(httpPath);
-    print("ref is good.");
-    print(ref.path);
-    final StorageFileDownloadTask downloadTask = ref.writeToFile(encFile);
+//    FutureBuilder(
+//        future: dbReference.once(),
+//        builder: (context, AsyncSnapshot<DataSnapshot> snapshot) {
+//          print('here');
+//          if (snapshot.hasData) {
+//            Map<dynamic, dynamic> values = snapshot.data.value;
+//            values.forEach((key, values) {
+//              print(key);
+//            });
+//          }
+//          return Container(
+//            color: Colors.black,
+//            width: 150.0,
+//            height: 150.0,
+//            child: _cachedFile != null
+//                ? Image.asset(
+//                _cachedFile.path) 
+//                : Container(),
+//          );
+//        }
+//        );
 
-    //wait for upload task to finish
-    final int byteNumber = (await downloadTask.future).totalByteCount;
 
-    print("byte number is $byteNumber" );
-    final file = await File('${tempDir.path}/decryptedfile').create(recursive: true);
-    print("good till here");
-
-    decFilepath = crypt.decryptFileSync(encFile.path);
-
-    print("decrypted?");
-
-    final ByteData bytes = await rootBundle.load(decFilepath);
-    file.writeAsBytes(bytes.buffer.asInt8List(),
-        mode: FileMode.write); //FIX ME, WRITE? OR READ?
-
-
-
-    setState(() {
-      _cachedFile = file;
-    });
+//    final StorageReference ref = FirebaseStorage.instance.ref().child(httpPath);
+//    print("ref is good.");
+//    print(ref.path);
+//    final StorageFileDownloadTask downloadTask = ref.writeToFile(encFile);
+//
+//    //wait for upload task to finish
+//    final int byteNumber = (await downloadTask.future).totalByteCount;
+//
+//    print("byte number is $byteNumber" );
+//    final file = await File('${tempDir.path}/decryptedfile').create(recursive: true);
+//    print("good till here");
+//
+//    decFilepath = crypt.decryptFileSync(encFile.path);
+//
+//    print("decrypted?");
+//
+//    final ByteData bytes = await rootBundle.load(decFilepath);
+//    file.writeAsBytes(bytes.buffer.asInt8List(),
+//        mode: FileMode.write); //FIX ME, WRITE? OR READ?
+//
+//
+//
+//    setState(() {
+//      _cachedFile = file;
+//    });
 
   }
 
 
 
   Future<Null> deleteData(String ownerEmail, String folderFileName, [String path]) async {
-    await _fireStore.collection('test')
-        .document(ownerEmail + folderFileName)
-        .delete();
+//    await _fireStore.collection('test')
+//        .document(ownerEmail + folderFileName)
+//        .delete();
     await _fireStore.collection('test')
         .document(ownerEmail + "encrypted" + folderFileName)
         .delete();
