@@ -2,6 +2,7 @@
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:addname/models/fileschema.dart';
 import 'package:encrypt/encrypt.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
@@ -72,9 +73,12 @@ class _filePage extends State<FilePage> {
 
   Future<File> get file => null;
 
-  void initState() {
+  void initState() async {
     super.initState();
     getCurrentUser();
+    final appDocumentDirectory =
+        await getApplicationDocumentsDirectory();
+    Hive.init(appDocumentDirectory.path);
   }
 
   void getCurrentUser() async {
@@ -191,6 +195,22 @@ class _filePage extends State<FilePage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
+                  FutureBuilder(
+                    future: Hive.openBox(loggedInUser.email+"data"),
+                    builder: (BuildContext context, AsyncSnapshot snapshot) {
+                      if(snapshot.connectionState == ConnectionState.done) {
+                        if(snapshot.hasError){
+                          return Text(snapshot.error.toString());
+                        }
+                        else{
+                          return Text("Hello");
+                        }
+                      } else {
+                        return Scaffold();
+                      }
+
+                    },
+                  ),
                   StreamBuilder<QuerySnapshot>(
                     stream: _fireStore.collection('test').snapshots(),
                     builder: (context, snapshot) {
@@ -1063,6 +1083,12 @@ class _filePage extends State<FilePage> {
     );
   }
 
+  void addDBEntry(FileSchema fileInfo){
+    Hive.box(loggedInUser.email + "data").add(fileInfo);
+
+
+  }
+
 
   Future<Null> uploadFile(String filepath, String fileName) async {
     try {
@@ -1071,6 +1097,13 @@ class _filePage extends State<FilePage> {
       final file = File("${tempDir.path}/$fileName");
       file.writeAsBytes(bytes.buffer.asInt8List(),
           mode: FileMode.write); //FIX ME, WRITE? OR READ?
+      //HIVE UPLOAD
+
+      final filesBox = Hive.box(loggedInUser.email+"data");
+      filesBox.add(file);
+
+      //FIREBASE
+
       final StorageReference ref = FirebaseStorage.instance.ref().child(filepath);
       print("upload file path is: $filepath");
       final StorageUploadTask task = ref.putFile(file);
@@ -1113,6 +1146,11 @@ class _filePage extends State<FilePage> {
     print(await encFile.length());
     final dbReference =  FirebaseDatabase.instance.reference().child("test");
     print(await dbReference.once());
+
+    //HIVE DOWNLOAD
+
+    final filesBox = Hive.box(loggedInUser.email+"data");
+
 
 //    FutureBuilder(
 //        future: dbReference.once(),
@@ -1163,6 +1201,22 @@ class _filePage extends State<FilePage> {
 //      _cachedFile = file;
 //    });
 
+  }
+
+  void dispose() {
+    Hive.box(loggedInUser.email+"data").close();
+    super.dispose();
+  }
+
+  ListView _buildListView() {
+    final filesBox = Hive.box(loggedInUser.email + "data");
+    return ListView.builder(
+      itemCount: filesBox.length,
+      itemBuilder: (context, index) {
+        return ListTile(
+        );
+      },
+    );
   }
 
 

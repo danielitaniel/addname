@@ -41,7 +41,7 @@ dependencies:
   path_provider: ^1.6.11
   hive: ^1.4.1+1 #will no longer be using firebase
   hive_flutter: ^0.3.0+2
-  build_runner: ^1.10.0
+  json_annotation: ^3.0.0
 
   #To encrypt/decrypt data
   encrypt: ^4.0.2
@@ -60,8 +60,15 @@ dev_dependencies:
   flutter_launcher_name: "^0.0.1"
   flutter_test:
     sdk: flutter
+  hive_generator: ^0.7.0+2
+  build_runner:
+  json_serializable:
 flutter_launcher_name:
   name: "@AddName"
+
+dependency_overrides:
+  dartx: ^0.3.0
+  path: ^1.7.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
