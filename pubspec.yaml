@@ -41,7 +41,8 @@ dependencies:
   path_provider: ^1.6.11
   hive: ^1.4.1+1 #will no longer be using firebase
   hive_flutter: ^0.3.0+2
-  json_annotation: ^3.0.0
+  #googleapis: ^0.55.0
+  #json_annotation: ^3.0.0
 
   #To encrypt/decrypt data
   encrypt: ^4.0.2
@@ -61,8 +62,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   hive_generator: ^0.7.0+2
-  build_runner:
-  json_serializable:
+  build_runner: ^1.10.0
+  #json_serializable: ^3.2.0
 flutter_launcher_name:
   name: "@AddName"
 

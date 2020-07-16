@@ -26,6 +26,7 @@ import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:build_runner/build_runner.dart';
 
+
 class Constants {
   static const String new_file = "Upload New File";
   static const String new_folder = "Create a New Folder";
@@ -76,9 +77,10 @@ class _filePage extends State<FilePage> {
   void initState() async {
     super.initState();
     getCurrentUser();
-    final appDocumentDirectory =
-        await getApplicationDocumentsDirectory();
-    Hive.init(appDocumentDirectory.path);
+//    final appDocumentDirectory =
+//        await getApplicationDocumentsDirectory();
+//    Hive.init(appDocumentDirectory.path);
+//    Hive.registerAdapter(FileSchemaAdapter());
   }
 
   void getCurrentUser() async {
@@ -195,22 +197,22 @@ class _filePage extends State<FilePage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  FutureBuilder(
-                    future: Hive.openBox(loggedInUser.email+"data"),
-                    builder: (BuildContext context, AsyncSnapshot snapshot) {
-                      if(snapshot.connectionState == ConnectionState.done) {
-                        if(snapshot.hasError){
-                          return Text(snapshot.error.toString());
-                        }
-                        else{
-                          return Text("Hello");
-                        }
-                      } else {
-                        return Scaffold();
-                      }
-
-                    },
-                  ),
+//                  FutureBuilder(
+//                    future: Hive.openBox(loggedInUser.email+"data"),
+//                    builder: (BuildContext context, AsyncSnapshot snapshot) {
+//                      if(snapshot.connectionState == ConnectionState.done) {
+//                        if(snapshot.hasError){
+//                          return Text(snapshot.error.toString());
+//                        }
+//                        else{
+//                          return Text("Hello");
+//                        }
+//                      } else {
+//                        return Scaffold();
+//                      }
+//
+//                    },
+//                  ),
                   StreamBuilder<QuerySnapshot>(
                     stream: _fireStore.collection('test').snapshots(),
                     builder: (context, snapshot) {
@@ -1083,26 +1085,31 @@ class _filePage extends State<FilePage> {
     );
   }
 
-  void addDBEntry(FileSchema fileInfo){
-    Hive.box(loggedInUser.email + "data").add(fileInfo);
-
-
-  }
-
 
   Future<Null> uploadFile(String filepath, String fileName) async {
     try {
+
+      //Create a temporary directory and file
       final ByteData bytes = await rootBundle.load(filepath);
       final Directory tempDir = Directory.systemTemp;
       final file = File("${tempDir.path}/$fileName");
       file.writeAsBytes(bytes.buffer.asInt8List(),
           mode: FileMode.write); //FIX ME, WRITE? OR READ?
       //HIVE UPLOAD
+      //Upload file to secondary server (hive)
+//      final filesBox = Hive.box(loggedInUser.email+"data");
+//      filesBox.put(loggedInUser.email+fileName, file);
 
-      final filesBox = Hive.box(loggedInUser.email+"data");
-      filesBox.add(file);
+      //This is the DB Schema to be added to Hive in order to list all folder and file names
+//      var fileSchema = new FileSchema(
+//        loggedInUser.email,
+//        fileName,
+//        false,
+//        [],
+//      );
+//      filesBox.add(fileSchema);
 
-      //FIREBASE
+      //OLD FIREBASE CODE
 
       final StorageReference ref = FirebaseStorage.instance.ref().child(filepath);
       print("upload file path is: $filepath");
@@ -1149,7 +1156,7 @@ class _filePage extends State<FilePage> {
 
     //HIVE DOWNLOAD
 
-    final filesBox = Hive.box(loggedInUser.email+"data");
+    //final filesBox = Hive.box(loggedInUser.email+"data");
 
 
 //    FutureBuilder(
@@ -1203,21 +1210,21 @@ class _filePage extends State<FilePage> {
 
   }
 
-  void dispose() {
-    Hive.box(loggedInUser.email+"data").close();
-    super.dispose();
-  }
+//  void dispose() {
+//    Hive.box(loggedInUser.email+"data").close();
+//    super.dispose();
+//  }
 
-  ListView _buildListView() {
-    final filesBox = Hive.box(loggedInUser.email + "data");
-    return ListView.builder(
-      itemCount: filesBox.length,
-      itemBuilder: (context, index) {
-        return ListTile(
-        );
-      },
-    );
-  }
+//  ListView _buildListView() {
+//    final filesBox = Hive.box(loggedInUser.email + "data");
+//    return ListView.builder(
+//      itemCount: filesBox.length,
+//      itemBuilder: (context, index) {
+//        return ListTile(
+//        );
+//      },
+//    );
+//  }
 
 
 
