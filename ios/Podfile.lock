@@ -212,6 +212,16 @@ PODS:
     - abseil/base/base_internal
     - abseil/base/config
     - abseil/meta/type_traits
+  - aws_s3 (0.0.1):
+    - AWSCognito
+    - AWSCore
+    - AWSS3
+    - Flutter
+  - AWSCognito (2.14.2):
+    - AWSCore (= 2.14.2)
+  - AWSCore (2.14.2)
+  - AWSS3 (2.14.2):
+    - AWSCore (= 2.14.2)
   - BoringSSL-GRPC (0.0.7):
     - BoringSSL-GRPC/Implementation (= 0.0.7)
     - BoringSSL-GRPC/Interface (= 0.0.7)
@@ -419,6 +429,7 @@ PODS:
     - SDWebImage/Core (~> 5.6)
 
 DEPENDENCIES:
+  - aws_s3 (from `.symlinks/plugins/aws_s3/ios`)
   - cloud_firestore (from `.symlinks/plugins/cloud_firestore/ios`)
   - cloud_firestore_web (from `.symlinks/plugins/cloud_firestore_web/ios`)
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
@@ -438,6 +449,9 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - abseil
+    - AWSCognito
+    - AWSCore
+    - AWSS3
     - BoringSSL-GRPC
     - DKImagePickerController
     - DKPhotoGallery
@@ -465,6 +479,8 @@ SPEC REPOS:
     - SDWebImageFLPlugin
 
 EXTERNAL SOURCES:
+  aws_s3:
+    :path: ".symlinks/plugins/aws_s3/ios"
   cloud_firestore:
     :path: ".symlinks/plugins/cloud_firestore/ios"
   cloud_firestore_web:
@@ -498,6 +514,10 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   abseil: 6c8eb7892aefa08d929b39f9bb108e5367e3228f
+  aws_s3: 01f73004966a469c748da1336ba7be2bcf031ba6
+  AWSCognito: 831e1eb1295f4e10442b16fc68b74c60d777b75c
+  AWSCore: 80da498ab0979e77dbdc7690a61ceaaccfb0499a
+  AWSS3: 2ea579ed91fb01a187f7d8d827e3936da488531e
   BoringSSL-GRPC: 8edf627ee524575e2f8d19d56f068b448eea3879
   cloud_firestore: 4cc700e236ebfe2d5d980e49cb066d202cfee0e9
   cloud_firestore_web: 9ec3dc7f5f98de5129339802d491c1204462bfec

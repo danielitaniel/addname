@@ -24,7 +24,10 @@ import 'package:aes_crypt/aes_crypt.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:build_runner/build_runner.dart';
+//import 'package:build_runner/build_runner.dart';
+import 'package:flutter_aws_s3_client/flutter_aws_s3_client.dart';
+import 'package:aws_s3/aws_s3.dart';
+import 'package:addname/displayfile.dart';
 
 
 class Constants {
@@ -72,16 +75,33 @@ class _filePage extends State<FilePage> {
   String uriPath; //Path to download URL from Firebase
   File _cachedFile;
 
-  Future<File> get file => null;
+  //Future<File> get file => null;
 
-  void initState() async {
+  void initState(){
     super.initState();
     getCurrentUser();
+    final region = "us-west-1";
+    final bucketId = "add-name-proto1.0";
+    final AwsS3Client s3client = AwsS3Client(
+        region: region,
+        host: "s3.$region.amazonaws.com",
+        bucketId: bucketId,
+        accessKey: "AKIAU26ZH36TSGZZ5HGQ",
+        secretKey: "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"
+    );
+
+
+    //AWS Build Client
+
+    // Region is set up as US West (N. California)
+    //This is used for receiving data from AWS S3
+
 //    final appDocumentDirectory =
 //        await getApplicationDocumentsDirectory();
 //    Hive.init(appDocumentDirectory.path);
 //    Hive.registerAdapter(FileSchemaAdapter());
   }
+
 
   void getCurrentUser() async {
     try {
@@ -270,7 +290,8 @@ class _filePage extends State<FilePage> {
                                               overflow: TextOverflow.ellipsis,
                                             ),
                                             onPressed: () async {
-
+                                              folderAndFileNames.clear();
+                                              Navigator.pushNamed(context, FilePage.title);
                                             },
                                           ),
                                         ),
@@ -357,12 +378,19 @@ class _filePage extends State<FilePage> {
                                                         FlatButton(
                                                           child: Text("Yes"),
                                                           onPressed: () {
+//                                                            Navigator.pop(
+//                                                                context);
+                                                            setState(() {
+                                                              showSpinner = true;
+                                                            });
                                                             deleteData(
                                                                 loggedInUser
                                                                     .email,
-                                                                '$dataName');
-                                                            Navigator.pop(
-                                                                context);
+                                                                '$dataName').whenComplete(() =>
+                                                                setState(() {
+                                                                  showSpinner = false;
+                                                                })
+                                                            );
                                                           },
                                                         ),
                                                       ],
@@ -418,9 +446,11 @@ class _filePage extends State<FilePage> {
                                               overflow: TextOverflow.ellipsis,
                                             ),
                                             onPressed: () async {
-                                              print("WE WANT TO DOWNLOAD: $filePath");
+                                              print(
+                                                  "WE WANT TO DOWNLOAD: $filePath");
                                               await downloadFile(filePath);
-                                            },
+                                              print("finished downloading");
+                                            }
                                           ),
                                         ),
                                       ),
@@ -639,6 +669,9 @@ class _filePage extends State<FilePage> {
                                             child: Text("Create"),
                                             textColor: Colors.orange,
                                             onPressed: () async {
+                                              setState(() {
+                                                showSpinner = true;
+                                              });
                                               //User must create folder name
                                               if ((newFolderName == null) || (newFolderName == "")) {
                                                 setState(() {
@@ -670,6 +703,9 @@ class _filePage extends State<FilePage> {
                                                                 null;
                                                                 Navigator.pop(
                                                                     context);
+                                                                setState(() {
+                                                                  showSpinner = false;
+                                                                });
                                                               },
                                                             ),
                                                           ),
@@ -720,6 +756,9 @@ class _filePage extends State<FilePage> {
                                                                 null;
                                                                 Navigator.pop(
                                                                     context);
+                                                                setState(() {
+                                                                  showSpinner = true;
+                                                                });
                                                               },
                                                             ),
                                                           ),
@@ -730,20 +769,24 @@ class _filePage extends State<FilePage> {
                                                 });
                                               } else {
                                                 //BUILD ENCRYPTION ALGORITHM BEFORE STORING.
+                                                Navigator.pop(context);
+                                                //NEED THIS SECOND CALL. DON'T REMOVE
+                                                Navigator.pop(context);
                                                 _fireStore.collection(
                                                     'test')
-                                                    .document(owner +
+                                                    .document(owner + "encrypted" +
                                                     newFolderName)
                                                     .setData({
                                                   "owner": owner,
                                                   "name": newFolderName,
                                                   "isFolder": true,
-                                                });
+                                                }).whenComplete(() => setState(() {
+                                                  showSpinner = false;
+                                                }));
                                                 userInputHolder.clear();
                                                 newFolderName = null;
-                                                Navigator.pop(context);
-                                                //NEED THIS SECOND CALL. DON'T REMOVE
-                                                Navigator.pop(context);
+                                                folderAndFileNames.clear();
+                                                Navigator.pushNamed(context, FilePage.title);
                                               }
                                             },
                                           ),
@@ -806,6 +849,8 @@ class _filePage extends State<FilePage> {
                                                   fileToUpload =
                                                   await FilePicker.getFile(
                                                       type: FileType.any);
+
+                                                  //fileToUpload.createSync(recursive: false);
 
                                                   //FIRST CRYPT PACKAGE
 //                                                  var key = encrypt.Key.fromUtf8("test key");
@@ -910,9 +955,6 @@ class _filePage extends State<FilePage> {
                                                       );
                                                     });
                                                   }
-                                                  setState(() {
-                                                    showSpinner = true;
-                                                  });
                                                   Navigator.pop(context);
                                                   //NEED THIS SECOND CALL. DON'T REMOVE
                                                   Navigator.pop(context);
@@ -959,6 +1001,10 @@ class _filePage extends State<FilePage> {
                                                       );
                                                     });
                                                   }
+
+                                                  setState(() {
+                                                    showSpinner = true;
+                                                  });
 
                                                   var owner = loggedInUser.email;
                                                   var fileNameExists = false;
@@ -1019,10 +1065,11 @@ class _filePage extends State<FilePage> {
                                                   } else {
                                                     var crypt = AesCrypt();
                                                     String encryptedFilePath;
-                                                    crypt.setOverwriteMode(AesCryptOwMode.warn);
+                                                    crypt.setOverwriteMode(AesCryptOwMode.rename);
 
                                                     //CHANGE PASSWORD TO BE BETTER
                                                     crypt.setPassword('my cool password');
+                                                    print("File To Upload Path ${fileToUpload.path}");
                                                     //create new encrypted file
                                                     Directory tempDir = await getTemporaryDirectory();
                                                     _newEncFile = await new File("${tempDir.path}/"+loggedInUser.email+newFileName+'.aes').create(recursive: true);
@@ -1031,7 +1078,8 @@ class _filePage extends State<FilePage> {
                                                       // '.aes' extension added.
                                                       //allows for over-write. make sure I really want this
                                                       crypt.setOverwriteMode(AesCryptOwMode.rename);
-                                                      encryptedFilePath = crypt.encryptFileSync(fileToUpload.path);
+                                                      print("encrypting file");
+                                                      encryptedFilePath = crypt.encryptFileSync(fileToUpload.path, _newEncFile.path);
                                                       print("ENCRYPTEDFILE: $encryptedFilePath");
                                                     } on AesCryptException catch (e) {
                                                       // It goes here if overwrite mode set as 'AesCryptFnMode.warn'
@@ -1045,9 +1093,16 @@ class _filePage extends State<FilePage> {
                                                       final RegExp regExp = RegExp('[^?/]*\.(aes)');
                                                       final String encryptedFileName = regExp.stringMatch(encryptedFilePath);
                                                       print("ENCRYPTED FILE NAME: $encryptedFileName");
-                                                      uploadFile(encryptedFilePath, "encrypted"+encryptedFileName);
+                                                      uploadFile(encryptedFilePath, "encrypted"+encryptedFileName, newFileName);
                                                       print("SUCCESS!!!");
                                                     } catch(e) {
+                                                      print("error is before upload");
+                                                      userInputHolder.clear();
+                                                      newFileName = null;
+                                                      fileToUpload = null;
+                                                      setState(() {
+                                                        showSpinner = false;
+                                                      });
                                                       print(e);
                                                     }
 
@@ -1086,15 +1141,18 @@ class _filePage extends State<FilePage> {
   }
 
 
-  Future<Null> uploadFile(String filepath, String fileName) async {
+  Future<Null> uploadFile(String filepath, String fileName, String userInputName) async {
     try {
 
       //Create a temporary directory and file
+      print("in uploadFIle");
+      //WidgetsFlutterBinding.ensureInitialized();
       final ByteData bytes = await rootBundle.load(filepath);
       final Directory tempDir = Directory.systemTemp;
       final file = File("${tempDir.path}/$fileName");
       file.writeAsBytes(bytes.buffer.asInt8List(),
           mode: FileMode.write); //FIX ME, WRITE? OR READ?
+      print("temp file created");
       //HIVE UPLOAD
       //Upload file to secondary server (hive)
 //      final filesBox = Hive.box(loggedInUser.email+"data");
@@ -1111,7 +1169,8 @@ class _filePage extends State<FilePage> {
 
       //OLD FIREBASE CODE
 
-      final StorageReference ref = FirebaseStorage.instance.ref().child(filepath);
+      print("about to upload");
+      final StorageReference ref = FirebaseStorage.instance.ref().child(fileName);
       print("upload file path is: $filepath");
       final StorageUploadTask task = ref.putFile(file);
       final Uri downloadUrl = (await task.onComplete).uploadSessionUri; // make sure this is correct
@@ -1120,16 +1179,19 @@ class _filePage extends State<FilePage> {
           .collection(
           'test')
           .document(loggedInUser.email +
-          fileName)
+          "encrypted" +
+          userInputName)
           .setData({
         "owner": loggedInUser.email,
-        "name": fileName,
+        "name": userInputName,
         "path": file.path,
         "isFolder": false,
         "url": uriPath,
       });
       print("ALL G");
       tempDir.deleteSync(recursive: true);
+      folderAndFileNames.clear();
+      Navigator.pushNamed(context, FilePage.title);
 
     } catch (e) {
       print(e);
@@ -1140,19 +1202,113 @@ class _filePage extends State<FilePage> {
 
     var crypt = AesCrypt();
     String decFilepath;
+    crypt.setOverwriteMode(AesCryptOwMode.rename);
     crypt.setPassword('my cool password');
 
 
-    print("httpPath $httpPath");
-    final RegExp regExp = RegExp('[^?/]*\.(aes)');
-    final String fileName = regExp.stringMatch(httpPath);
-    print(fileName);
-    final Directory tempDir = Directory.systemTemp;
-    final encFile = await File("${tempDir.path}/todecrypt$fileName").create(recursive: true);
+    try {
+      print("httpPath $httpPath");
+      final RegExp regExp = RegExp('[^?/]*\.(aes)');
+      final String fileName = regExp.stringMatch(httpPath);
+      print(fileName);
+      final Directory tempDir = Directory.systemTemp;
+      final encFile = await File("${tempDir.path}/todecrypt$fileName").create(
+          recursive: true);
 
-    print(await encFile.length());
-    final dbReference =  FirebaseDatabase.instance.reference().child("test");
-    print(await dbReference.once());
+      print(await encFile.length());
+      final dbReference = FirebaseStorage.instance.ref().child(fileName);
+      print("All G");
+      final StorageFileDownloadTask downloadTask = dbReference.writeToFile(
+          encFile);
+
+      //wait for upload task to finish
+      final int byteNumber = (await downloadTask.future).totalByteCount;
+
+
+      print("byte count is $byteNumber");
+
+      final file = await File('${tempDir.path}/decryptedfile').create(
+          recursive: true);
+      print("good till here");
+
+      decFilepath = crypt.decryptFileSync(encFile.path);
+
+      print("decrypted?");
+
+      final ByteData bytes = await rootBundle.load(decFilepath);
+      print("loaded bytes");
+      file.writeAsBytes(bytes.buffer.asInt8List(),
+          mode: FileMode.write).whenComplete(() =>
+          setState(() {
+            _cachedFile = file;
+            Navigator.push(context, MaterialPageRoute(
+                builder: (context) => DisplayFilePage(file)));
+            print("CASHED FILE LENGTH ${_cachedFile.lengthSync()}");
+          })
+      ); //FIX ME, WRITE? OR READ?
+
+
+//      folderAndFileNames.clear();
+//      Navigator.pushNamed(context, FilePage.title);
+    } catch(e) {
+      print("error is here");
+      print(e);
+      Navigator.pushNamed(context, FilePage.title);
+//      if (e.runtimeType == AesCryptException) {
+//        return showDialog(
+//            context: context,
+//            barrierDismissible: true,
+//            builder: (
+//                BuildContext context) {
+//              return AlertDialog(
+//                title: RichText(
+//                  text: TextSpan(
+//                    children: [
+//                      TextSpan(
+//                        text: "This File Has Already Been Downloaded",
+//                        style: TextStyle(
+//                          fontSize: 20.0,
+//                          color: Colors
+//                              .black,
+//                        ),
+//                      ),
+//                    ],
+//                  ),
+//                ),
+//                content: RichText(
+//                  text: TextSpan(
+//                    children: [
+//                      TextSpan(
+//                        text: "Would you like to over-write file?",
+//                        style: TextStyle(
+//                          fontSize: 20.0,
+//                          color: Colors
+//                              .black,
+//                        ),
+//                      ),
+//                    ],
+//                  ),
+//                ),
+//                actions: <Widget>[
+//                  FlatButton(
+//                    child: Text("No"),
+//                    onPressed: () {
+//                      Navigator.pop(
+//                          context);
+//                    },
+//                  ),
+//                  FlatButton(
+//                    child: Text("Yes"),
+//                    onPressed: (){
+//                      crypt.setOverwriteMode(AesCryptOwMode.rename);
+//                    },
+//                  ),
+//                ],
+//              );
+//            }
+//        );
+//      }
+    }
 
     //HIVE DOWNLOAD
 
@@ -1239,6 +1395,8 @@ class _filePage extends State<FilePage> {
       await _fireStorage.ref().child(path).delete();
       folderAndFileNames.remove(folderFileName);
     }
+    folderAndFileNames.clear();
+    Navigator.pushNamed(context, FilePage.title);
   }
 }
 
