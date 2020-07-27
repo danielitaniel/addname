@@ -38,8 +38,10 @@ dependencies:
   file_picker: ^1.12.0
   github: ^6.0.0
   path_provider: ^1.6.11
-  flutter_aws_s3_client: ^0.5.2 #will use AWS for storage, unofficial.
+  async: #for delegatingstream widget
+  flutter_aws_s3_client: ^0.5.2 #will use AWS for storage, unofficial. (on second thoughts I may not use this package)
   aws_s3: ^0.1.1+hotfix.5 #unofficial
+  amazon_cognito_identity_dart: ^0.0.22 #unofficial, use this for HTTP POST
   #hive: ^1.4.1+1 #will no longer be using firebase's database anymore
   #hive_flutter: ^0.3.0+2
   #googleapis: ^0.55.0
@@ -48,6 +50,7 @@ dependencies:
   #To encrypt/decrypt data
   encrypt: ^4.0.2
   aes_crypt: ^0.1.1
+  http: ^0.12.2
 
 
 

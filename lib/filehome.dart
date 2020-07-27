@@ -7,6 +7,8 @@ import 'package:encrypt/encrypt.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'dart:async' show Future;
+import 'package:async/async.dart';
 import 'package:addname/welcome.dart';
 //import 'package:addname/datasearch.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -28,6 +30,11 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_aws_s3_client/flutter_aws_s3_client.dart';
 import 'package:aws_s3/aws_s3.dart';
 import 'package:addname/displayfile.dart';
+import 'package:amazon_cognito_identity_dart/sig_v4.dart';
+import 'package:http/http.dart' as http;
+import 'package:addname/policyhelper.dart';
+import 'dart:convert';
+
 
 
 class Constants {
@@ -40,7 +47,7 @@ class Constants {
   ];
 }
 
-
+// ignore: must_be_immutable
 class FilePage extends StatefulWidget {
   //FilePage({Key key, this.title}) : super(key: key);
 
@@ -52,10 +59,17 @@ class FilePage extends StatefulWidget {
   // case the title) provided by the parent (in this case the App widget) and
   // used by the build method of the State. Fields in a Widget subclass are
   // always marked "final".
+  List dataInFolder;
+  String currFolder;
+  FilePage([List data, String folder]){
+    dataInFolder = data;
+    currFolder = folder;
+  }
+
 
   static String title = "file_home_route";
   @override
-  _filePage createState() => _filePage();
+  _filePage createState() => _filePage(dataInFolder, currFolder);
 }
 
 class _filePage extends State<FilePage> {
@@ -74,21 +88,28 @@ class _filePage extends State<FilePage> {
   File _newEncFile;
   String uriPath; //Path to download URL from Firebase
   File _cachedFile;
+  List dataInFolder;
+  String currFolder;
+  final _region = "us-west-1";
+  static const String _bucketId = "add-name-proto1.0";
+  static const _accessKeyID = "input access key"; //remove this before pushing to GitHub
+  static const _secretKeyID = "input secret key"; //remove this before pushing to GitHub
+  static const _s3Endpoint =
+      "https://s3.console.aws.amazon.com/s3/buckets/add-name-proto1.0/?region=us-west-1&tab=overview";
+
+  _filePage([List data, String folder]){
+    dataInFolder = data;
+
+    currFolder = folder;
+  }
+
 
   //Future<File> get file => null;
 
   void initState(){
     super.initState();
     getCurrentUser();
-    final region = "us-west-1";
-    final bucketId = "add-name-proto1.0";
-    final AwsS3Client s3client = AwsS3Client(
-        region: region,
-        host: "s3.$region.amazonaws.com",
-        bucketId: bucketId,
-        accessKey: "AKIAU26ZH36TSGZZ5HGQ",
-        secretKey: "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"
-    );
+
 
 
     //AWS Build Client
@@ -249,6 +270,7 @@ class _filePage extends State<FilePage> {
                             final dataName = file.data["name"];
                             final filePath = file.data["path"];
                             final isFolder = file.data["isFolder"];
+                            final dataContained = file.data["dataContained"];
 
                             if (!folderAndFileNames.contains(dataName)) {
                               folderAndFileNames.add(dataName);
@@ -291,7 +313,14 @@ class _filePage extends State<FilePage> {
                                             ),
                                             onPressed: () async {
                                               folderAndFileNames.clear();
-                                              Navigator.pushNamed(context, FilePage.title);
+                                              if(dataInFolder == null) {
+                                                Navigator.pushNamed(
+                                                    context, FilePage.title);
+                                              } else {
+                                                Navigator.push(context, MaterialPageRoute(
+                                                  builder: (context) => FilePage(dataInFolder, currFolder),
+                                                ));
+                                              }
                                             },
                                           ),
                                         ),
@@ -386,7 +415,7 @@ class _filePage extends State<FilePage> {
                                                             deleteData(
                                                                 loggedInUser
                                                                     .email,
-                                                                '$dataName').whenComplete(() =>
+                                                                '$dataName', false).whenComplete(() =>
                                                                 setState(() {
                                                                   showSpinner = false;
                                                                 })
@@ -446,9 +475,8 @@ class _filePage extends State<FilePage> {
                                               overflow: TextOverflow.ellipsis,
                                             ),
                                             onPressed: () async {
-                                              print(
-                                                  "WE WANT TO DOWNLOAD: $filePath");
-                                              await downloadFile(filePath);
+                                              print("DATA NAME IS $dataName");
+                                              await downloadFile(dataName);
                                               print("finished downloading");
                                             }
                                           ),
@@ -540,7 +568,7 @@ class _filePage extends State<FilePage> {
                                                                 loggedInUser
                                                                     .email,
                                                                 '$dataName',
-                                                                filePath);
+                                                                true);
                                                             Navigator.pop(
                                                                 context);
                                                           },
@@ -780,13 +808,21 @@ class _filePage extends State<FilePage> {
                                                   "owner": owner,
                                                   "name": newFolderName,
                                                   "isFolder": true,
+                                                  "dataContained": [],
                                                 }).whenComplete(() => setState(() {
                                                   showSpinner = false;
                                                 }));
                                                 userInputHolder.clear();
                                                 newFolderName = null;
                                                 folderAndFileNames.clear();
-                                                Navigator.pushNamed(context, FilePage.title);
+                                                if(dataInFolder == null) {
+                                                  Navigator.pushNamed(
+                                                      context, FilePage.title);
+                                                } else {
+                                                  Navigator.push(context, MaterialPageRoute(
+                                                    builder: (context) => FilePage(dataInFolder, currFolder),
+                                                  ));
+                                                }
                                               }
                                             },
                                           ),
@@ -1146,7 +1182,7 @@ class _filePage extends State<FilePage> {
 
       //Create a temporary directory and file
       print("in uploadFIle");
-      //WidgetsFlutterBinding.ensureInitialized();
+      WidgetsFlutterBinding.ensureInitialized();
       final ByteData bytes = await rootBundle.load(filepath);
       final Directory tempDir = Directory.systemTemp;
       final file = File("${tempDir.path}/$fileName");
@@ -1169,36 +1205,85 @@ class _filePage extends State<FilePage> {
 
       //OLD FIREBASE CODE
 
-      print("about to upload");
-      final StorageReference ref = FirebaseStorage.instance.ref().child(fileName);
-      print("upload file path is: $filepath");
-      final StorageUploadTask task = ref.putFile(file);
-      final Uri downloadUrl = (await task.onComplete).uploadSessionUri; // make sure this is correct
-      uriPath = downloadUrl.toString();
-      await _fireStore
-          .collection(
-          'test')
-          .document(loggedInUser.email +
-          "encrypted" +
-          userInputName)
-          .setData({
-        "owner": loggedInUser.email,
-        "name": userInputName,
-        "path": file.path,
-        "isFolder": false,
-        "url": uriPath,
-      });
-      print("ALL G");
+//      print("about to upload");
+//      final StorageReference ref = FirebaseStorage.instance.ref().child("encrypted" + userInputName);
+//      print("upload file path is: $filepath");
+//      final StorageUploadTask task = ref.putFile(file);
+//      final Uri downloadUrl = (await task.onComplete).uploadSessionUri; // make sure this is correct
+//      uriPath = downloadUrl.toString();
+//      await _fireStore
+//          .collection(
+//          'test')
+//          .document(loggedInUser.email +
+//          "encrypted" +
+//          userInputName)
+//          .setData({
+//        "owner": loggedInUser.email,
+//        "name": userInputName,
+//        "path": file.path,
+//        "isFolder": false,
+//        "url": uriPath,
+//      });
+//      print("ALL G");
+      //tempDir.deleteSync(recursive: true);
+      //folderAndFileNames.clear();
+
+      //AWS code
+
+      final stream = http.ByteStream(Stream.castFrom(file.openRead()));
+      final int length = await file.length();
+
+      print("Length is $length");
+
+      print("byte stream success");
+
+      final uri = Uri.parse(_s3Endpoint);
+      final req = http.MultipartRequest("POST", uri);
+      final multipartFile = http.MultipartFile("file", stream, length, filename: userInputName);
+      print("multi-part good");
+      final policy = Policy.fromS3PreSignedPost("file/"+userInputName, _bucketId, _accessKeyID, 1, length, region: _region);
+      print("policy good");
+      final key =
+      SigV4.calculateSigningKey(_secretKeyID, policy.datetime, _region, 's3');
+      final signature = SigV4.calculateSignature(key, policy.encode());
+      print("all good till req part");
+      req.files.add(multipartFile);
+      req.fields['key'] = policy.key;
+      req.fields['acl'] = 'public-read';
+      req.fields['X-Amz-Credential'] = policy.credential;
+      req.fields['X-Amz-Algorithm'] = 'AWS4-HMAC-SHA256';
+      req.fields['X-Amz-Date'] = policy.datetime;
+      req.fields['Policy'] = policy.encode();
+      req.fields['X-Amz-Signature'] = signature;
+      print("all good before try");
+      try {
+        final res = await req.send();
+        print("res good");
+        await for (var value in res.stream.transform(utf8.decoder)) {
+          print(value);
+        }
+      } catch (e) {
+        print(e.toString());
+      }
+
+      if(dataInFolder == null) {
+        Navigator.pushNamed(
+            context, FilePage.title);
+      } else {
+        Navigator.push(context, MaterialPageRoute(
+          builder: (context) => FilePage(dataInFolder, currFolder),
+        ));
+      }
+
       tempDir.deleteSync(recursive: true);
       folderAndFileNames.clear();
-      Navigator.pushNamed(context, FilePage.title);
 
     } catch (e) {
-      print(e);
+      print(e.toString());
     }
   }
 
-  Future<Null> downloadFile(String httpPath) async {
+  Future<Null> downloadFile(String fileName) async {
 
     var crypt = AesCrypt();
     String decFilepath;
@@ -1207,16 +1292,17 @@ class _filePage extends State<FilePage> {
 
 
     try {
-      print("httpPath $httpPath");
-      final RegExp regExp = RegExp('[^?/]*\.(aes)');
-      final String fileName = regExp.stringMatch(httpPath);
-      print(fileName);
+      //print("httpPath $httpPath");
+      //final RegExp regExp = RegExp('[^?/]*\.(aes)');
+      //final String fileName = regExp.stringMatch(httpPath);
+      //print(fileName);
       final Directory tempDir = Directory.systemTemp;
       final encFile = await File("${tempDir.path}/todecrypt$fileName").create(
           recursive: true);
 
       print(await encFile.length());
-      final dbReference = FirebaseStorage.instance.ref().child(fileName);
+      print("FILE NAME IS $fileName");
+      final dbReference = FirebaseStorage.instance.ref().child("encrypted" + fileName);
       print("All G");
       final StorageFileDownloadTask downloadTask = dbReference.writeToFile(
           encFile);
@@ -1253,7 +1339,14 @@ class _filePage extends State<FilePage> {
     } catch(e) {
       print("error is here");
       print(e);
-      Navigator.pushNamed(context, FilePage.title);
+      if(dataInFolder == null) {
+        Navigator.pushNamed(
+            context, FilePage.title);
+      } else {
+        Navigator.push(context, MaterialPageRoute(
+          builder: (context) => FilePage(dataInFolder, currFolder),
+        ));
+      }
 //      if (e.runtimeType == AesCryptException) {
 //        return showDialog(
 //            context: context,
@@ -1384,19 +1477,26 @@ class _filePage extends State<FilePage> {
 
 
 
-  Future<Null> deleteData(String ownerEmail, String folderFileName, [String path]) async {
+  Future<Null> deleteData(String ownerEmail, String folderFileName, bool isFile) async {
 //    await _fireStore.collection('test')
 //        .document(ownerEmail + folderFileName)
 //        .delete();
     await _fireStore.collection('test')
         .document(ownerEmail + "encrypted" + folderFileName)
         .delete();
-    if (path != null) {
-      await _fireStorage.ref().child(path).delete();
-      folderAndFileNames.remove(folderFileName);
+    if (isFile) {
+      await _fireStorage.ref().child("encrypted" + folderFileName).delete();
     }
+    folderAndFileNames.remove(folderFileName);
     folderAndFileNames.clear();
-    Navigator.pushNamed(context, FilePage.title);
+    if(dataInFolder == null) {
+      Navigator.pushNamed(
+          context, FilePage.title);
+    } else {
+      Navigator.push(context, MaterialPageRoute(
+        builder: (context) => FilePage(dataInFolder, currFolder),
+      ));
+    }
   }
 }
 
