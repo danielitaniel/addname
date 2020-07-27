@@ -39,11 +39,11 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
-#
-#/android/app/
-google-services.json
-#/ios/Runner/Base.lproj/
-*.plist
+#ignore local files
+/android/app/
+
+/ios/Runner/Base.lproj/
+
 
 
 # Exceptions to above rules.
