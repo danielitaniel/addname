@@ -43,7 +43,7 @@ app.*.map.json
 #/android/app/
 google-services.json
 #/ios/Runner/Base.lproj/
-GoogleService-Info.pist
+*.plist
 
 
 # Exceptions to above rules.
