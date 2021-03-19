@@ -1,6 +1,6 @@
-# addname
+# End to End Encrypted File Sharing Application for Android + IOS Users
 
-A new Flutter application.
+During summer, I played around with Google's Flutter and Dart and developed a mobile application. Although this project was never completed, I consider this an MVP for my application.
 
 ## Getting Started
 
